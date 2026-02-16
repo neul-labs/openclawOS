@@ -134,6 +134,71 @@ See [Capabilities](../architecture/capabilities.md) for full details.
 }
 ```
 
+#### ui
+
+UI elements contributed to the dashboard:
+
+```json
+{
+  "ui": {
+    "tabs": [
+      {
+        "id": "dashboard",
+        "title": "My Dashboard",
+        "icon": "layout-dashboard",
+        "render": {
+          "type": "iframe",
+          "src": "/app/@myorg/myapp/dashboard"
+        },
+        "position": "bottom",
+        "badge": {
+          "method": "myapp.getBadgeCount",
+          "interval": 30
+        }
+      }
+    ],
+    "components": [
+      {
+        "tag": "myapp-widget",
+        "module": "./components/widget.js",
+        "scope": "tab"
+      }
+    ],
+    "settings": [
+      {
+        "id": "config",
+        "title": "My App Settings",
+        "render": {
+          "type": "component",
+          "tag": "myapp-settings"
+        }
+      }
+    ]
+  }
+}
+```
+
+**Tab Fields:**
+
+| Field      | Type   | Required | Description                                               |
+| ---------- | ------ | -------- | --------------------------------------------------------- |
+| `id`       | string | Yes      | Unique identifier                                         |
+| `title`    | string | Yes      | Display name                                              |
+| `icon`     | string | No       | Lucide icon name                                          |
+| `render`   | object | Yes      | `{ type: "iframe", src }` or `{ type: "component", tag }` |
+| `position` | string | No       | `top`, `bottom`, `after:chat`, `after:channels`           |
+| `badge`    | object | No       | `{ method, interval }` for badge counts                   |
+
+**Component Fields:**
+
+| Field    | Type   | Required | Description                              |
+| -------- | ------ | -------- | ---------------------------------------- |
+| `tag`    | string | Yes      | Custom element tag (must include hyphen) |
+| `module` | string | Yes      | Path to JavaScript module                |
+| `scope`  | string | Yes      | `tab`, `widget`, `settings`, or `global` |
+
+See [UI Contributions](../developing-apps/ui-contributions.md) for detailed documentation.
+
 #### providers
 
 ```json

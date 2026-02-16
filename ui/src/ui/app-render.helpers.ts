@@ -1,6 +1,7 @@
-import { html } from "lit";
+import { html, nothing } from "lit";
 import { repeat } from "lit/directives/repeat.js";
 import type { AppViewState } from "./app-view-state.ts";
+import type { AppTab } from "./controllers/ui-manifest.ts";
 import type { ThemeTransitionContext } from "./theme-transition.ts";
 import type { ThemeMode } from "./theme.ts";
 import type { SessionsListResult } from "./types.ts";
@@ -9,7 +10,14 @@ import { syncUrlWithSessionKey } from "./app-settings.ts";
 import { OpenClawApp } from "./app.ts";
 import { ChatState, loadChatHistory } from "./controllers/chat.ts";
 import { icons } from "./icons.ts";
-import { iconForTab, pathForTab, titleForTab, type Tab } from "./navigation.ts";
+import {
+  iconForTab,
+  pathForTab,
+  titleForTab,
+  isDynamicTab,
+  getDynamicTabId,
+  type Tab,
+} from "./navigation.ts";
 
 type SessionDefaultsSnapshot = {
   mainSessionKey?: string;
@@ -46,8 +54,21 @@ function resetChatStateForSessionSwitch(state: AppViewState, sessionKey: string)
   });
 }
 
-export function renderTab(state: AppViewState, tab: Tab) {
+export function renderTab(
+  state: AppViewState,
+  tab: Tab,
+  dynamicTabs: AppTab[] = [],
+  tabBadges: Map<string, number> = new Map(),
+) {
   const href = pathForTab(tab, state.basePath);
+  const isDynamic = isDynamicTab(tab);
+  const dynamicTabConfig = isDynamic
+    ? dynamicTabs.find((t) => t.id === getDynamicTabId(tab))
+    : undefined;
+  const badge = isDynamic ? tabBadges.get(getDynamicTabId(tab)) : undefined;
+  const title = titleForTab(tab, dynamicTabConfig);
+  const icon = iconForTab(tab, dynamicTabConfig);
+
   return html`
     <a
       href=${href}
@@ -73,10 +94,11 @@ export function renderTab(state: AppViewState, tab: Tab) {
         }
         state.setTab(tab);
       }}
-      title=${titleForTab(tab)}
+      title=${title}
     >
-      <span class="nav-item__icon" aria-hidden="true">${icons[iconForTab(tab)]}</span>
-      <span class="nav-item__text">${titleForTab(tab)}</span>
+      <span class="nav-item__icon" aria-hidden="true">${icons[icon]}</span>
+      <span class="nav-item__text">${title}</span>
+      ${badge && badge > 0 ? html`<span class="nav-item__badge">${badge}</span>` : nothing}
     </a>
   `;
 }

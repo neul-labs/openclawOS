@@ -262,5 +262,6 @@ See [Testing Apps](testing.md) for testing strategies.
 - [App Structure](app-structure.md) - Detailed manifest and directory layout
 - [Channel Apps](channel-app.md) - Deep dive into channel development
 - [Plugin Apps](plugin-app.md) - Building plugin applications
+- [UI Contributions](ui-contributions.md) - Adding tabs, components, and settings to the dashboard
 - [Message Flow](message-flow.md) - Understanding message routing
 - [SDK Reference](../sdk/index.md) - API documentation

@@ -1,3 +1,4 @@
+import type { AppTab } from "./controllers/ui-manifest.ts";
 import type { IconName } from "./icons.js";
 
 export const TAB_GROUPS = [
@@ -10,7 +11,8 @@ export const TAB_GROUPS = [
   { label: "Settings", tabs: ["config", "debug", "logs"] },
 ] as const;
 
-export type Tab =
+// Static tabs are the built-in tabs
+export type StaticTab =
   | "agents"
   | "overview"
   | "channels"
@@ -26,7 +28,10 @@ export type Tab =
   | "debug"
   | "logs";
 
-const TAB_PATHS: Record<Tab, string> = {
+// Tab type includes both static and dynamic (app-contributed) tabs
+export type Tab = StaticTab | `app:${string}`;
+
+const TAB_PATHS: Record<StaticTab, string> = {
   agents: "/agents",
   overview: "/overview",
   channels: "/channels",
@@ -43,7 +48,113 @@ const TAB_PATHS: Record<Tab, string> = {
   logs: "/logs",
 };
 
-const PATH_TO_TAB = new Map(Object.entries(TAB_PATHS).map(([tab, path]) => [path, tab as Tab]));
+const PATH_TO_TAB = new Map(
+  Object.entries(TAB_PATHS).map(([tab, path]) => [path, tab as StaticTab]),
+);
+
+// =============================================================================
+// Dynamic Tab Helpers
+// =============================================================================
+
+/** Check if a tab is a dynamic (app-contributed) tab */
+export function isDynamicTab(tab: Tab): tab is `app:${string}` {
+  return tab.startsWith("app:");
+}
+
+/** Check if a tab is a static (built-in) tab */
+export function isStaticTab(tab: Tab): tab is StaticTab {
+  return !isDynamicTab(tab);
+}
+
+/** Get the dynamic tab ID without the "app:" prefix */
+export function getDynamicTabId(tab: Tab): string {
+  return tab.replace(/^app:/, "");
+}
+
+/** Create a tab ID from a dynamic tab ID */
+export function makeDynamicTab(id: string): `app:${string}` {
+  return `app:${id}`;
+}
+
+// =============================================================================
+// Effective Tab Groups (with dynamic tabs merged in)
+// =============================================================================
+
+export type EffectiveTabGroup = {
+  label: string;
+  tabs: Tab[];
+};
+
+/**
+ * Merge static tab groups with dynamic app-contributed tabs.
+ * Dynamic tabs are positioned based on their position property:
+ * - "top": First tab in first group
+ * - "after:chat": After the chat tab
+ * - "after:channels": After the channels tab
+ * - "bottom" (default): In a new "Apps" group at the end
+ */
+export function getEffectiveTabGroups(
+  staticGroups: typeof TAB_GROUPS,
+  dynamicTabs: AppTab[],
+): EffectiveTabGroup[] {
+  // Clone static groups
+  const groups: EffectiveTabGroup[] = staticGroups.map((g) => ({
+    label: g.label,
+    tabs: [...g.tabs] as Tab[],
+  }));
+
+  // Track bottom-positioned tabs for "Apps" group
+  const appsTabs: Tab[] = [];
+
+  for (const tab of dynamicTabs) {
+    const tabId = makeDynamicTab(tab.id);
+
+    switch (tab.position) {
+      case "top":
+        // Add to beginning of first group
+        if (groups.length > 0) {
+          groups[0].tabs.unshift(tabId);
+        }
+        break;
+
+      case "after:chat": {
+        // Find chat tab and insert after it
+        const chatGroup = groups.find((g) => g.tabs.includes("chat"));
+        if (chatGroup) {
+          const chatIdx = chatGroup.tabs.indexOf("chat");
+          chatGroup.tabs.splice(chatIdx + 1, 0, tabId);
+        } else {
+          appsTabs.push(tabId);
+        }
+        break;
+      }
+
+      case "after:channels": {
+        // Find channels tab and insert after it
+        const channelsGroup = groups.find((g) => g.tabs.includes("channels" as Tab));
+        if (channelsGroup) {
+          const chanIdx = channelsGroup.tabs.indexOf("channels" as Tab);
+          channelsGroup.tabs.splice(chanIdx + 1, 0, tabId);
+        } else {
+          appsTabs.push(tabId);
+        }
+        break;
+      }
+
+      case "bottom":
+      default:
+        appsTabs.push(tabId);
+        break;
+    }
+  }
+
+  // Add "Apps" group if there are bottom-positioned tabs
+  if (appsTabs.length > 0) {
+    groups.push({ label: "Apps", tabs: appsTabs });
+  }
+
+  return groups;
+}
 
 export function normalizeBasePath(basePath: string): string {
   if (!basePath) {
@@ -78,7 +189,13 @@ export function normalizePath(path: string): string {
 
 export function pathForTab(tab: Tab, basePath = ""): string {
   const base = normalizeBasePath(basePath);
-  const path = TAB_PATHS[tab];
+  let path: string;
+  if (isDynamicTab(tab)) {
+    // Dynamic tabs use /app/{id} path
+    path = `/app/${getDynamicTabId(tab)}`;
+  } else {
+    path = TAB_PATHS[tab];
+  }
   return base ? `${base}${path}` : path;
 }
 
@@ -98,6 +215,11 @@ export function tabFromPath(pathname: string, basePath = ""): Tab | null {
   }
   if (normalized === "/") {
     return "chat";
+  }
+  // Check for dynamic app tab: /app/{id}
+  const appMatch = normalized.match(/^\/app\/(.+)$/);
+  if (appMatch) {
+    return makeDynamicTab(appMatch[1]);
   }
   return PATH_TO_TAB.get(normalized) ?? null;
 }
@@ -124,7 +246,14 @@ export function inferBasePathFromPathname(pathname: string): string {
   return `/${segments.join("/")}`;
 }
 
-export function iconForTab(tab: Tab): IconName {
+export function iconForTab(tab: Tab, dynamicTabConfig?: AppTab): IconName {
+  if (isDynamicTab(tab) && dynamicTabConfig?.icon) {
+    // Validate that the icon is a known icon name
+    return (dynamicTabConfig.icon as IconName) || "puzzle";
+  }
+  if (isDynamicTab(tab)) {
+    return "puzzle";
+  }
   switch (tab) {
     case "agents":
       return "folder";
@@ -159,7 +288,13 @@ export function iconForTab(tab: Tab): IconName {
   }
 }
 
-export function titleForTab(tab: Tab) {
+export function titleForTab(tab: Tab, dynamicTabConfig?: AppTab): string {
+  if (isDynamicTab(tab) && dynamicTabConfig?.title) {
+    return dynamicTabConfig.title;
+  }
+  if (isDynamicTab(tab)) {
+    return getDynamicTabId(tab);
+  }
   switch (tab) {
     case "agents":
       return "Agents";
@@ -194,7 +329,11 @@ export function titleForTab(tab: Tab) {
   }
 }
 
-export function subtitleForTab(tab: Tab) {
+export function subtitleForTab(tab: Tab, dynamicTabConfig?: AppTab): string {
+  if (isDynamicTab(tab)) {
+    // Dynamic tabs don't have subtitles defined in AppTab
+    return "";
+  }
   switch (tab) {
     case "agents":
       return "Manage agent workspaces, tools, and identities.";

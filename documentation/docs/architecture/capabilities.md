@@ -107,6 +107,53 @@ For packages that extend the gateway API:
 }
 ```
 
+### UI Capabilities
+
+For packages that contribute UI elements to the dashboard:
+
+```json
+{
+  "capabilities": {
+    "ui": {
+      "tabs": [
+        {
+          "id": "dashboard",
+          "title": "My Dashboard",
+          "icon": "layout-dashboard",
+          "render": { "type": "iframe", "src": "/app/@myorg/myapp/dashboard" },
+          "position": "bottom",
+          "badge": { "method": "myapp.getBadgeCount", "interval": 30 }
+        }
+      ],
+      "components": [
+        {
+          "tag": "myapp-widget",
+          "module": "./components/widget.js",
+          "scope": "tab"
+        }
+      ],
+      "settings": [
+        {
+          "id": "config",
+          "title": "My App Settings",
+          "render": { "type": "component", "tag": "myapp-settings" }
+        }
+      ]
+    }
+  }
+}
+```
+
+#### UI Elements
+
+| Element      | Description                          |
+| ------------ | ------------------------------------ |
+| `tabs`       | Sidebar navigation tabs              |
+| `components` | Web components for dynamic rendering |
+| `settings`   | Settings panel sections              |
+
+See [UI Contributions](../developing-apps/ui-contributions.md) for detailed documentation.
+
 ### Provider Capabilities
 
 For packages that implement LLM providers:

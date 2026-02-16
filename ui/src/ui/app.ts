@@ -308,6 +308,12 @@ export class OpenClawApp extends LitElement {
   @state() appstoreMessages: import("./controllers/appstore.ts").AppStoreMessageMap = {};
   @state() appstoreInstallPending: import("./controllers/appstore.ts").PackageInfo | null = null;
 
+  // UI Manifest (app-contributed UI elements)
+  @state() uiManifestLoading = false;
+  @state() uiManifestError: string | null = null;
+  @state() uiManifest: import("./controllers/ui-manifest.ts").UiManifestResult | null = null;
+  @state() tabBadges: Map<string, number> = new Map();
+
   @state() debugLoading = false;
   @state() debugStatus: StatusSummary | null = null;
   @state() debugHealth: HealthSnapshot | null = null;

@@ -247,6 +247,22 @@ const entries: SubCliEntry[] = [
       mod.registerCompletionCli(program);
     },
   },
+  {
+    name: "create",
+    description: "Create a new OpenClawOS package",
+    register: async (program) => {
+      const mod = await import("../create-cli.js");
+      mod.registerCreateCli(program);
+    },
+  },
+  {
+    name: "verify",
+    description: "Verify an OpenClawOS package",
+    register: async (program) => {
+      const mod = await import("../verify-cli.js");
+      mod.registerVerifyCli(program);
+    },
+  },
 ];
 
 export function getSubCliEntries(): SubCliEntry[] {

@@ -26,6 +26,7 @@ nav:
       - App Structure: developing-apps/app-structure.md
       - Channel Apps: developing-apps/channel-app.md
       - Plugin Apps: developing-apps/plugin-app.md
+      - UI Contributions: developing-apps/ui-contributions.md
       - Message Flow: developing-apps/message-flow.md
       - Testing: developing-apps/testing.md
   - Developing Skills:

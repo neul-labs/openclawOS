@@ -283,6 +283,8 @@ export class KernelClient extends EventEmitter<KernelClientEvents> {
       timestamp: Date.now(),
       method,
       params,
+      // Include token for authenticated requests (all methods except app.register)
+      ...(this.token ? { token: this.token } : {}),
     };
 
     return new Promise((resolve, reject) => {

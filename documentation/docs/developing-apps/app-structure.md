@@ -117,6 +117,29 @@ The `openclawos.manifest.json` file defines your app:
 
 See [Capabilities](../architecture/capabilities.md) for full reference.
 
+### UI Contributions
+
+Apps can contribute UI elements to the dashboard:
+
+```json
+{
+  "capabilities": {
+    "ui": {
+      "tabs": [
+        {
+          "id": "dashboard",
+          "title": "My Dashboard",
+          "icon": "layout-dashboard",
+          "render": { "type": "iframe", "src": "/app/@myorg/myapp/dashboard" }
+        }
+      ]
+    }
+  }
+}
+```
+
+See [UI Contributions](ui-contributions.md) for detailed documentation on tabs, components, and settings panels.
+
 ### Configuration Schema
 
 Define app configuration using JSON Schema:

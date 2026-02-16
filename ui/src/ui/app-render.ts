@@ -66,7 +66,15 @@ import {
   updateSkillEnabled,
 } from "./controllers/skills.ts";
 import { icons } from "./icons.ts";
-import { normalizeBasePath, TAB_GROUPS, subtitleForTab, titleForTab } from "./navigation.ts";
+import {
+  normalizeBasePath,
+  TAB_GROUPS,
+  subtitleForTab,
+  titleForTab,
+  getEffectiveTabGroups,
+  isDynamicTab,
+  getDynamicTabId,
+} from "./navigation.ts";
 import { renderAgents } from "./views/agents.ts";
 import { renderAppStore } from "./views/appstore.ts";
 import { renderChannels } from "./views/channels.ts";
@@ -74,6 +82,7 @@ import { renderChat } from "./views/chat.ts";
 import { renderConfig } from "./views/config.ts";
 import { renderCron } from "./views/cron.ts";
 import { renderDebug } from "./views/debug.ts";
+import { renderDynamicTab } from "./views/dynamic-tab.ts";
 import { renderExecApprovalPrompt } from "./views/exec-approval.ts";
 import { renderGatewayUrlConfirmation } from "./views/gateway-url-confirmation.ts";
 import { renderInstances } from "./views/instances.ts";
@@ -157,7 +166,7 @@ export function renderApp(state: AppViewState) {
         </div>
       </header>
       <aside class="nav ${state.settings.navCollapsed ? "nav--collapsed" : ""}">
-        ${TAB_GROUPS.map((group) => {
+        ${getEffectiveTabGroups(TAB_GROUPS, state.uiManifest?.tabs ?? []).map((group) => {
           const isGroupCollapsed = state.settings.navGroupsCollapsed[group.label] ?? false;
           const hasActiveTab = group.tabs.some((tab) => tab === state.tab);
           return html`
@@ -178,7 +187,7 @@ export function renderApp(state: AppViewState) {
                 <span class="nav-label__chevron">${isGroupCollapsed ? "+" : "−"}</span>
               </button>
               <div class="nav-group__items">
-                ${group.tabs.map((tab) => renderTab(state, tab))}
+                ${group.tabs.map((tab) => renderTab(state, tab, state.uiManifest?.tabs ?? [], state.tabBadges))}
               </div>
             </div>
           `;
@@ -204,8 +213,8 @@ export function renderApp(state: AppViewState) {
       <main class="content ${isChat ? "content--chat" : ""}">
         <section class="content-header">
           <div>
-            ${state.tab === "usage" ? nothing : html`<div class="page-title">${titleForTab(state.tab)}</div>`}
-            ${state.tab === "usage" ? nothing : html`<div class="page-sub">${subtitleForTab(state.tab)}</div>`}
+            ${state.tab === "usage" ? nothing : html`<div class="page-title">${titleForTab(state.tab, isDynamicTab(state.tab) ? state.uiManifest?.tabs?.find((t) => t.id === getDynamicTabId(state.tab)) : undefined)}</div>`}
+            ${state.tab === "usage" ? nothing : html`<div class="page-sub">${subtitleForTab(state.tab, isDynamicTab(state.tab) ? state.uiManifest?.tabs?.find((t) => t.id === getDynamicTabId(state.tab)) : undefined)}</div>`}
           </div>
           <div class="page-meta">
             ${state.lastError ? html`<div class="pill danger">${state.lastError}</div>` : nothing}
@@ -986,6 +995,18 @@ export function renderApp(state: AppViewState) {
               })
             : nothing
         }
+
+        ${(() => {
+          if (!isDynamicTab(state.tab)) {
+            return nothing;
+          }
+          const dynamicId = getDynamicTabId(state.tab);
+          const appTab = state.uiManifest?.tabs?.find((t) => t.id === dynamicId);
+          if (!appTab) {
+            return nothing;
+          }
+          return renderDynamicTab({ tab: appTab });
+        })()}
       </main>
       ${renderExecApprovalPrompt(state)}
       ${renderGatewayUrlConfirmation(state)}
