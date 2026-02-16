@@ -6,7 +6,7 @@ export const TAB_GROUPS = [
     label: "Control",
     tabs: ["overview", "channels", "instances", "sessions", "usage", "cron"],
   },
-  { label: "Agent", tabs: ["agents", "skills", "nodes"] },
+  { label: "Agent", tabs: ["agents", "skills", "appstore", "nodes"] },
   { label: "Settings", tabs: ["config", "debug", "logs"] },
 ] as const;
 
@@ -19,6 +19,7 @@ export type Tab =
   | "usage"
   | "cron"
   | "skills"
+  | "appstore"
   | "nodes"
   | "chat"
   | "config"
@@ -34,6 +35,7 @@ const TAB_PATHS: Record<Tab, string> = {
   usage: "/usage",
   cron: "/cron",
   skills: "/skills",
+  appstore: "/appstore",
   nodes: "/nodes",
   chat: "/chat",
   config: "/config",
@@ -142,6 +144,8 @@ export function iconForTab(tab: Tab): IconName {
       return "loader";
     case "skills":
       return "zap";
+    case "appstore":
+      return "package";
     case "nodes":
       return "monitor";
     case "config":
@@ -173,6 +177,8 @@ export function titleForTab(tab: Tab) {
       return "Cron Jobs";
     case "skills":
       return "Skills";
+    case "appstore":
+      return "App Store";
     case "nodes":
       return "Nodes";
     case "chat":
@@ -206,6 +212,8 @@ export function subtitleForTab(tab: Tab) {
       return "Schedule wakeups and recurring agent runs.";
     case "skills":
       return "Manage skill availability and API key injection.";
+    case "appstore":
+      return "Browse, install, and configure apps, skills, and agents.";
     case "nodes":
       return "Paired devices, capabilities, and command exposure.";
     case "chat":

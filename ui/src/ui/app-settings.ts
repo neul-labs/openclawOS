@@ -11,6 +11,7 @@ import { scheduleChatScroll, scheduleLogsScroll } from "./app-scroll.ts";
 import { loadAgentIdentities, loadAgentIdentity } from "./controllers/agent-identity.ts";
 import { loadAgentSkills } from "./controllers/agent-skills.ts";
 import { loadAgents } from "./controllers/agents.ts";
+import { loadPackages } from "./controllers/appstore.ts";
 import { loadChannels } from "./controllers/channels.ts";
 import { loadConfig, loadConfigSchema } from "./controllers/config.ts";
 import { loadCronJobs, loadCronStatus } from "./controllers/cron.ts";
@@ -196,6 +197,9 @@ export async function refreshActiveTab(host: SettingsHost) {
   }
   if (host.tab === "skills") {
     await loadSkills(host as unknown as OpenClawApp);
+  }
+  if (host.tab === "appstore") {
+    await loadPackages(host as unknown as OpenClawApp);
   }
   if (host.tab === "agents") {
     await loadAgents(host as unknown as OpenClawApp);

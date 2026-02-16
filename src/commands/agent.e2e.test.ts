@@ -14,10 +14,9 @@ vi.mock("../agents/model-catalog.js", () => ({
 
 import type { OpenClawConfig } from "../config/config.js";
 import type { RuntimeEnv } from "../runtime.js";
-import { telegramPlugin } from "../../extensions/telegram/src/channel.js";
-import { setTelegramRuntime } from "../../extensions/telegram/src/runtime.js";
 import { loadModelCatalog } from "../agents/model-catalog.js";
 import { runEmbeddedPiAgent } from "../agents/pi-embedded.js";
+import { telegramPlugin, setTelegramRuntime } from "../channels/plugins/builtin/index.js";
 import * as configModule from "../config/config.js";
 import { emitAgentEvent, onAgentEvent } from "../infra/agent-events.js";
 import { setActivePluginRegistry } from "../plugins/runtime.js";

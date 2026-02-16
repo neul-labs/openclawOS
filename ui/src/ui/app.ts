@@ -298,6 +298,15 @@ export class OpenClawApp extends LitElement {
   @state() skillsBusyKey: string | null = null;
   @state() skillMessages: Record<string, SkillMessage> = {};
 
+  @state() appstoreLoading = false;
+  @state() appstorePackages: import("./controllers/appstore.ts").PackageInfo[] | null = null;
+  @state() appstoreError: string | null = null;
+  @state() appstoreFilter = "";
+  @state() appstoreCategory: import("./controllers/appstore.ts").PackageCategory = "all";
+  @state() appstoreSelectedId: string | null = null;
+  @state() appstoreBusyKey: string | null = null;
+  @state() appstoreMessages: import("./controllers/appstore.ts").AppStoreMessageMap = {};
+
   @state() debugLoading = false;
   @state() debugStatus: StatusSummary | null = null;
   @state() debugHealth: HealthSnapshot | null = null;

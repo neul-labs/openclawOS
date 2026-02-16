@@ -8,6 +8,15 @@ import { loadAgentFileContent, loadAgentFiles, saveAgentFile } from "./controlle
 import { loadAgentIdentities, loadAgentIdentity } from "./controllers/agent-identity.ts";
 import { loadAgentSkills } from "./controllers/agent-skills.ts";
 import { loadAgents } from "./controllers/agents.ts";
+import {
+  loadPackages,
+  installPackage,
+  uninstallPackage,
+  setPackageEnabled,
+  setFilter as setAppstoreFilter,
+  setCategory as setAppstoreCategory,
+  selectPackage,
+} from "./controllers/appstore.ts";
 import { loadChannels } from "./controllers/channels.ts";
 import { loadChatHistory } from "./controllers/chat.ts";
 import {
@@ -53,6 +62,7 @@ import {
 import { icons } from "./icons.ts";
 import { normalizeBasePath, TAB_GROUPS, subtitleForTab, titleForTab } from "./navigation.ts";
 import { renderAgents } from "./views/agents.ts";
+import { renderAppStore } from "./views/appstore.ts";
 import { renderChannels } from "./views/channels.ts";
 import { renderChat } from "./views/chat.ts";
 import { renderConfig } from "./views/config.ts";
@@ -123,10 +133,10 @@ export function renderApp(state: AppViewState) {
           </button>
           <div class="brand">
             <div class="brand-logo">
-              <img src=${basePath ? `${basePath}/favicon.svg` : "/favicon.svg"} alt="OpenClaw" />
+              <img src=${basePath ? `${basePath}/favicon.svg` : "/favicon.svg"} alt="OpenClawOS" />
             </div>
             <div class="brand-text">
-              <div class="brand-title">OPENCLAW</div>
+              <div class="brand-title">OPENCLAWOS</div>
               <div class="brand-sub">Gateway Dashboard</div>
             </div>
           </div>
@@ -697,6 +707,28 @@ export function renderApp(state: AppViewState) {
                 onSaveKey: (key) => saveSkillApiKey(state, key),
                 onInstall: (skillKey, name, installId) =>
                   installSkill(state, skillKey, name, installId),
+              })
+            : nothing
+        }
+
+        ${
+          state.tab === "appstore"
+            ? renderAppStore({
+                loading: state.appstoreLoading,
+                packages: state.appstorePackages,
+                error: state.appstoreError,
+                filter: state.appstoreFilter,
+                category: state.appstoreCategory,
+                selectedId: state.appstoreSelectedId,
+                busyKey: state.appstoreBusyKey,
+                messages: state.appstoreMessages,
+                onFilterChange: (next) => setAppstoreFilter(state, next),
+                onCategoryChange: (next) => setAppstoreCategory(state, next),
+                onSelect: (id) => selectPackage(state, id),
+                onInstall: (id) => installPackage(state, id),
+                onUninstall: (id) => uninstallPackage(state, id),
+                onToggleEnabled: (id, enabled) => setPackageEnabled(state, id, enabled),
+                onRefresh: () => loadPackages(state, { clearMessages: true }),
               })
             : nothing
         }

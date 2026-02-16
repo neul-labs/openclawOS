@@ -197,6 +197,14 @@ export type AppViewState = {
   skillEdits: Record<string, string>;
   skillMessages: Record<string, SkillMessage>;
   skillsBusyKey: string | null;
+  appstoreLoading: boolean;
+  appstorePackages: import("./controllers/appstore.ts").PackageInfo[] | null;
+  appstoreError: string | null;
+  appstoreFilter: string;
+  appstoreCategory: import("./controllers/appstore.ts").PackageCategory;
+  appstoreSelectedId: string | null;
+  appstoreBusyKey: string | null;
+  appstoreMessages: import("./controllers/appstore.ts").AppStoreMessageMap;
   debugLoading: boolean;
   debugStatus: StatusSummary | null;
   debugHealth: HealthSnapshot | null;

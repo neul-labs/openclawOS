@@ -5,7 +5,7 @@
  * Agent templates define pre-configured agent personalities without code.
  */
 
-import type { PackageManifest, AgentCapabilities } from "@openclawos/protocol";
+import type { PackageManifest } from "@openclawos/protocol";
 
 // =============================================================================
 // Agent Template

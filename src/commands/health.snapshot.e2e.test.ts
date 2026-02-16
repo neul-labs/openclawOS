@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { HealthSummary } from "./health.js";
-import { telegramPlugin } from "../../extensions/telegram/src/channel.js";
+import { telegramPlugin, setTelegramRuntime } from "../channels/plugins/builtin/index.js";
 import { setActivePluginRegistry } from "../plugins/runtime.js";
 import { createTestRegistry } from "../test-utils/channel-plugins.js";
 import { getHealthSnapshot } from "./health.js";
@@ -78,7 +78,6 @@ describe("getHealthSnapshot", () => {
       createTestRegistry([{ pluginId: "telegram", plugin: telegramPlugin, source: "test" }]),
     );
     const { createPluginRuntime } = await import("../plugins/runtime/index.js");
-    const { setTelegramRuntime } = await import("../../extensions/telegram/src/runtime.js");
     setTelegramRuntime(createPluginRuntime());
   });
 

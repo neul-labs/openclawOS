@@ -6,7 +6,6 @@
 
 import type {
   IPCRequest,
-  IPCResponse,
   IPCEvent,
   IPCMessage,
   IPCMethodName,
@@ -15,8 +14,6 @@ import type {
   IPCErrorCode,
   PackageManifest,
   AppRegisterResult,
-  createRequest,
-  createErrorResponse,
 } from "@openclawos/protocol";
 import { EventEmitter } from "node:events";
 import net from "node:net";
@@ -393,7 +390,8 @@ export class KernelClient extends EventEmitter<KernelClientEvents> {
       }
 
       case "stream": {
-        // TODO: Handle streaming responses
+        // Streaming responses not yet implemented in IPC protocol.
+        // Would emit incremental chunks for long-running operations.
         break;
       }
     }

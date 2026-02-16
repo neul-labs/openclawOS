@@ -1,7 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { OpenClawConfig } from "../../config/config.js";
-import { slackPlugin } from "../../../extensions/slack/src/channel.js";
-import { telegramPlugin } from "../../../extensions/telegram/src/channel.js";
+import { slackPlugin, telegramPlugin } from "../../channels/plugins/builtin/index.js";
 import { setActivePluginRegistry } from "../../plugins/runtime.js";
 import { createTestRegistry } from "../../test-utils/channel-plugins.js";
 
@@ -52,8 +51,8 @@ const telegramConfig = {
 describe("runMessageAction threading auto-injection", () => {
   beforeEach(async () => {
     const { createPluginRuntime } = await import("../../plugins/runtime/index.js");
-    const { setSlackRuntime } = await import("../../../extensions/slack/src/runtime.js");
-    const { setTelegramRuntime } = await import("../../../extensions/telegram/src/runtime.js");
+    const { setSlackRuntime, setTelegramRuntime } =
+      await import("../../channels/plugins/builtin/index.js");
     const runtime = createPluginRuntime();
     setSlackRuntime(runtime);
     setTelegramRuntime(runtime);

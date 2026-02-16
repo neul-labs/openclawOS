@@ -261,7 +261,7 @@ export class AppSupervisor extends EventEmitter<SupervisorEvents> {
     });
 
     child.on("exit", (code, signal) => {
-      this.handleExit(app, code, signal);
+      void this.handleExit(app, code, signal);
     });
   }
 

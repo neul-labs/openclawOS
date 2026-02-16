@@ -28,7 +28,7 @@ function computeBackoff(policy: BackoffPolicy, attempt: number): number {
 }
 
 function sleepWithAbort(ms: number, abortSignal?: AbortSignal): Promise<void> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve, _reject) => {
     if (abortSignal?.aborted) {
       resolve();
       return;

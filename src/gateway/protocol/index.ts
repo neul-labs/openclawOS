@@ -1,6 +1,42 @@
 import AjvPkg, { type ErrorObject } from "ajv";
 import type { SessionsPatchResult } from "../session-utils.types.js";
 import {
+  type AppsConfigureParams,
+  AppsConfigureParamsSchema,
+  AppsConfigureResultSchema,
+  type AppsConfigureResult,
+  type AppsGetConfigParams,
+  AppsGetConfigParamsSchema,
+  AppsGetConfigResultSchema,
+  type AppsGetConfigResult,
+  type AppsInfoParams,
+  AppsInfoParamsSchema,
+  AppsInfoResultSchema,
+  type AppsInfoResult,
+  type AppsInstallParams,
+  AppsInstallParamsSchema,
+  AppsInstallResultSchema,
+  type AppsInstallResult,
+  type AppsListParams,
+  AppsListParamsSchema,
+  AppsListResultSchema,
+  type AppsListResult,
+  type AppsSetEnabledParams,
+  AppsSetEnabledParamsSchema,
+  AppsSetEnabledResultSchema,
+  type AppsSetEnabledResult,
+  type AppsStatusParams,
+  AppsStatusParamsSchema,
+  AppsStatusResultSchema,
+  type AppsStatusResult,
+  type AppsUninstallParams,
+  AppsUninstallParamsSchema,
+  AppsUninstallResultSchema,
+  type AppsUninstallResult,
+  type PackageInfo,
+  PackageInfoSchema,
+} from "./schema.js";
+import {
   type AgentEvent,
   AgentEventSchema,
   type AgentIdentityParams,
@@ -254,6 +290,19 @@ export const validateAgentsFilesGetParams = ajv.compile<AgentsFilesGetParams>(
 export const validateAgentsFilesSetParams = ajv.compile<AgentsFilesSetParams>(
   AgentsFilesSetParamsSchema,
 );
+export const validateAppsListParams = ajv.compile<AppsListParams>(AppsListParamsSchema);
+export const validateAppsInfoParams = ajv.compile<AppsInfoParams>(AppsInfoParamsSchema);
+export const validateAppsInstallParams = ajv.compile<AppsInstallParams>(AppsInstallParamsSchema);
+export const validateAppsUninstallParams =
+  ajv.compile<AppsUninstallParams>(AppsUninstallParamsSchema);
+export const validateAppsConfigureParams =
+  ajv.compile<AppsConfigureParams>(AppsConfigureParamsSchema);
+export const validateAppsGetConfigParams =
+  ajv.compile<AppsGetConfigParams>(AppsGetConfigParamsSchema);
+export const validateAppsSetEnabledParams = ajv.compile<AppsSetEnabledParams>(
+  AppsSetEnabledParamsSchema,
+);
+export const validateAppsStatusParams = ajv.compile<AppsStatusParams>(AppsStatusParamsSchema);
 export const validateNodePairRequestParams = ajv.compile<NodePairRequestParams>(
   NodePairRequestParamsSchema,
 );
@@ -405,6 +454,23 @@ export function formatValidationErrors(errors: ErrorObject[] | null | undefined)
 }
 
 export {
+  AppsListParamsSchema,
+  AppsListResultSchema,
+  AppsInfoParamsSchema,
+  AppsInfoResultSchema,
+  AppsInstallParamsSchema,
+  AppsInstallResultSchema,
+  AppsUninstallParamsSchema,
+  AppsUninstallResultSchema,
+  AppsConfigureParamsSchema,
+  AppsConfigureResultSchema,
+  AppsGetConfigParamsSchema,
+  AppsGetConfigResultSchema,
+  AppsSetEnabledParamsSchema,
+  AppsSetEnabledResultSchema,
+  AppsStatusParamsSchema,
+  AppsStatusResultSchema,
+  PackageInfoSchema,
   ConnectParamsSchema,
   HelloOkSchema,
   RequestFrameSchema,
@@ -501,6 +567,23 @@ export {
 };
 
 export type {
+  AppsListParams,
+  AppsListResult,
+  AppsInfoParams,
+  AppsInfoResult,
+  AppsInstallParams,
+  AppsInstallResult,
+  AppsUninstallParams,
+  AppsUninstallResult,
+  AppsConfigureParams,
+  AppsConfigureResult,
+  AppsGetConfigParams,
+  AppsGetConfigResult,
+  AppsSetEnabledParams,
+  AppsSetEnabledResult,
+  AppsStatusParams,
+  AppsStatusResult,
+  PackageInfo,
   GatewayFrame,
   ConnectParams,
   HelloOk,

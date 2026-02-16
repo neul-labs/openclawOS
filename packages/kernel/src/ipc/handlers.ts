@@ -33,11 +33,10 @@ import type {
   MessageDispatchResult,
   AgentQueueParams,
   AgentQueueResult,
-  PackageManifest,
 } from "@openclawos/protocol";
 import type { CapabilityTracker } from "../registry/capabilities.js";
 import type { AppRegistry } from "../registry/registry.js";
-import type { IPCConnection, IPCMethodHandler } from "./connection.js";
+import type { IPCMethodHandler } from "./connection.js";
 import type { IPCServer } from "./server.js";
 
 export interface HandlerDependencies {
@@ -279,11 +278,12 @@ function handleHookResult(_deps: HandlerDependencies): IPCMethodHandler {
       throw new Error("App must be registered");
     }
 
-    const { eventId, result } = params as HookResultParams;
+    const { eventId: _eventId, result: _result } = params as HookResultParams;
 
-    // This will be integrated with the hook runner in the gateway
-    // For now, store pending hook results for retrieval
-    // deps.hookRunner.resolveHook(eventId, result);
+    // Hook result handling is currently a no-op.
+    // When IPC-based hook interception is needed, this will integrate with
+    // the gateway's hook runner to resolve pending intercept promises.
+    // See: src/gateway/server-ipc-bridge.ts for hook forwarding to IPC apps.
 
     return { ok: true };
   };

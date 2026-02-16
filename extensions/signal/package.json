@@ -2,11 +2,12 @@
   "name": "@openclaw/signal",
   "version": "2026.2.15",
   "private": true,
-  "description": "OpenClaw Signal channel plugin",
+  "description": "DEPRECATED: Use @openclawos/signal app with runtime: ipc. Kept for backward compatibility.",
   "type": "module",
   "devDependencies": {
     "openclaw": "workspace:*"
   },
+  "deprecated": "Use @openclawos/signal app instead",
   "openclaw": {
     "extensions": [
       "./index.ts"

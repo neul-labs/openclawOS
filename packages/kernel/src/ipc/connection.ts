@@ -6,7 +6,6 @@
 
 import type {
   IPCMessage,
-  IPCRequest,
   IPCResponse,
   IPCEvent,
   IPCErrorCode,
@@ -138,7 +137,7 @@ export class IPCConnection extends EventEmitter<IPCConnectionEvents> {
       try {
         const message = JSON.parse(line) as IPCMessage;
         this.emit("message", message);
-        this.handleMessage(message);
+        void this.handleMessage(message);
       } catch {
         // Ignore parse errors - malformed messages are dropped
       }

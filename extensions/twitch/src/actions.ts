@@ -145,8 +145,9 @@ export const twitchMessageActions: ChannelMessageActionAdapter = {
       return errorResponse("No channel specified and no default channel in account config");
     }
 
+    // TypeScript guard - sendText is always defined
     if (!twitchOutbound.sendText) {
-      return errorResponse("sendText not implemented");
+      return errorResponse("sendText unexpectedly undefined");
     }
 
     try {

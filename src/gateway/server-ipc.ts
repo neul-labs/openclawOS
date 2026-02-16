@@ -24,8 +24,11 @@ interface CapabilityTrackerLike {
 
 interface AppSupervisorLike {
   spawn: (manifest: unknown) => Promise<unknown>;
+  stop: (appId: string) => Promise<void>;
   stopAll: () => Promise<void>;
   markReady: (appId: string) => void;
+  getStatus: (appId: string) => { status: string } | undefined;
+  listApps: () => Array<{ appId: string; status: string }>;
 }
 
 // Types for gateway integration
@@ -150,12 +153,12 @@ export async function initIPCIntegration(
 
   // Event handlers for app registration
   appRegistry.on("registered", (appId: unknown) => {
-    log.info(`App registered: ${appId}`);
+    log.info(`App registered: ${String(appId)}`);
   });
 
   appRegistry.on("ready", (appId: unknown) => {
-    log.info(`App ready: ${appId}`);
-    supervisor.markReady(appId as string);
+    log.info(`App ready: ${String(appId)}`);
+    supervisor.markReady(String(appId));
   });
 
   capabilities.on("registered", (cap: unknown) => {
@@ -228,7 +231,7 @@ export async function spawnConfiguredApps(
       log.info(`Spawning app: ${(manifest as { id: string }).id}`);
       await supervisor.spawn(manifest);
     } catch (err) {
-      log.warn(`Failed to spawn app ${appName}: ${err}`);
+      log.warn(`Failed to spawn app ${appName}: ${String(err)}`);
     }
   }
 }

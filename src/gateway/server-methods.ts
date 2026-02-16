@@ -2,6 +2,7 @@ import type { GatewayRequestHandlers, GatewayRequestOptions } from "./server-met
 import { ErrorCodes, errorShape } from "./protocol/index.js";
 import { agentHandlers } from "./server-methods/agent.js";
 import { agentsHandlers } from "./server-methods/agents.js";
+import { appsHandlers } from "./server-methods/apps.js";
 import { browserHandlers } from "./server-methods/browser.js";
 import { channelsHandlers } from "./server-methods/channels.js";
 import { chatHandlers } from "./server-methods/chat.js";
@@ -78,6 +79,10 @@ const READ_METHODS = new Set([
   "chat.history",
   "config.get",
   "talk.config",
+  "apps.list",
+  "apps.info",
+  "apps.getConfig",
+  "apps.status",
 ]);
 const WRITE_METHODS = new Set([
   "send",
@@ -154,6 +159,10 @@ function authorizeGatewayMethod(method: string, client: GatewayRequestOptions["c
     method === "agents.delete" ||
     method === "skills.install" ||
     method === "skills.update" ||
+    method === "apps.install" ||
+    method === "apps.uninstall" ||
+    method === "apps.configure" ||
+    method === "apps.setEnabled" ||
     method === "cron.add" ||
     method === "cron.update" ||
     method === "cron.remove" ||
@@ -193,6 +202,7 @@ export const coreGatewayHandlers: GatewayRequestHandlers = {
   ...usageHandlers,
   ...agentHandlers,
   ...agentsHandlers,
+  ...appsHandlers,
   ...browserHandlers,
 };
 

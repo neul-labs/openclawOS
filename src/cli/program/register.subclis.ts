@@ -224,6 +224,14 @@ const entries: SubCliEntry[] = [
     },
   },
   {
+    name: "packages",
+    description: "Package management (apps, skills, agents, extensions)",
+    register: async (program) => {
+      const mod = await import("../packages-cli.js");
+      mod.registerPackagesCli(program);
+    },
+  },
+  {
     name: "update",
     description: "CLI update helpers",
     register: async (program) => {

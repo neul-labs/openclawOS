@@ -1,11 +1,13 @@
 {
   "name": "@openclaw/discord",
   "version": "2026.2.15",
-  "description": "OpenClaw Discord channel plugin",
+  "private": true,
+  "description": "DEPRECATED: Use @openclawos/discord app with runtime: ipc. Kept for backward compatibility.",
   "type": "module",
   "devDependencies": {
     "openclaw": "workspace:*"
   },
+  "deprecated": "Use @openclawos/discord app instead",
   "openclaw": {
     "extensions": [
       "./index.ts"

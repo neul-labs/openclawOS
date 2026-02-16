@@ -1,0 +1,75 @@
+site_name: OpenClawOS Documentation
+site_description: OS-like architecture for AI assistants
+repo_url: https://github.com/openclaw/openclaw
+
+theme:
+  name: material
+  palette:
+    scheme: slate
+    primary: deep orange
+  features:
+    - navigation.sections
+    - navigation.expand
+    - content.code.copy
+    - navigation.tabs
+
+nav:
+  - Home: index.md
+  - Architecture:
+      - Overview: architecture/index.md
+      - Kernel: architecture/kernel.md
+      - IPC Protocol: architecture/ipc-protocol.md
+      - Process Supervision: architecture/process-supervision.md
+      - Capabilities: architecture/capabilities.md
+  - Developing Apps:
+      - Getting Started: developing-apps/index.md
+      - App Structure: developing-apps/app-structure.md
+      - Channel Apps: developing-apps/channel-app.md
+      - Plugin Apps: developing-apps/plugin-app.md
+      - Message Flow: developing-apps/message-flow.md
+      - Testing: developing-apps/testing.md
+  - Developing Skills:
+      - Overview: developing-skills/index.md
+      - Skill Structure: developing-skills/skill-structure.md
+      - Examples: developing-skills/examples.md
+  - Developing Agents:
+      - Overview: developing-agents/index.md
+      - Examples: developing-agents/examples.md
+  - SDK Reference:
+      - Overview: sdk/index.md
+      - KernelClient: sdk/kernel-client.md
+      - OpenClawApp: sdk/openclaw-app.md
+      - ChannelApp: sdk/channel-app.md
+      - Hooks: sdk/hooks.md
+  - Existing Apps:
+      - Overview: existing-apps/index.md
+      - Channel Apps:
+          - Overview: existing-apps/channel-apps/index.md
+          - Telegram: existing-apps/channel-apps/telegram.md
+          - Discord: existing-apps/channel-apps/discord.md
+          - Matrix: existing-apps/channel-apps/matrix.md
+      - Plugin Apps:
+          - Overview: existing-apps/plugin-apps/index.md
+          - Diagnostics: existing-apps/plugin-apps/diagnostics.md
+          - Voice Call: existing-apps/plugin-apps/voice-call.md
+  - Reference:
+      - Manifest Schema: reference/manifest-schema.md
+      - IPC Methods: reference/ipc-methods.md
+      - Hook Events: reference/hook-events.md
+      - Configuration: reference/config-schema.md
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - admonition
+  - tables
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - attr_list
+  - md_in_html

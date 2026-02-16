@@ -4,9 +4,8 @@
  * Helpers for testing apps, skills, agents, and extensions.
  */
 
-import type { PackageManifest, IPCRequest, IPCResponse, IPCEvent } from "@openclawos/protocol";
+import type { PackageManifest, IPCEvent } from "@openclawos/protocol";
 import type { AgentTemplate, AgentConfig } from "./agent.js";
-import type { KernelClient } from "./client.js";
 import type { ExtensionContext, KernelServices } from "./extension.js";
 import type { SkillContext, SkillTool, ToolContext, ToolResult } from "./skill.js";
 
@@ -76,7 +75,7 @@ export class MockKernelClient {
   }
 
   async register(
-    manifest: PackageManifest,
+    _manifest: PackageManifest,
   ): Promise<{ appId: string; token: string; protocolVersion: string }> {
     this.registered = true;
     return { appId: this.appId, token: "test-token", protocolVersion: "1.0" };
@@ -112,7 +111,7 @@ export class MockKernelClient {
     this.subscribedHooks = this.subscribedHooks.filter((e) => !events.includes(e));
   }
 
-  async sendHookResult(eventId: string, result: unknown): Promise<void> {}
+  async sendHookResult(_eventId: string, _result: unknown): Promise<void> {}
 
   async getConfig(path?: string): Promise<unknown> {
     return this.call("config.get", { path });

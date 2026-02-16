@@ -125,8 +125,9 @@ export type DiscordUiConfig = {
 export type DiscordAccountConfig = {
   /**
    * Runtime mode for this channel:
-   * - "in-process" (default): runs within the gateway process
-   * - "ipc": runs as an isolated OpenClawOS app via IPC
+   * - "in-process": runs within the gateway process (legacy)
+   * - "ipc" (recommended): runs as an isolated OpenClawOS app via IPC
+   * @default "in-process" for backwards compatibility, but "ipc" is recommended
    */
   runtime?: "in-process" | "ipc";
   /** Optional display name for this account (used in CLI/UI lists). */

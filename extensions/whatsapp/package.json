@@ -2,11 +2,12 @@
   "name": "@openclaw/whatsapp",
   "version": "2026.2.15",
   "private": true,
-  "description": "OpenClaw WhatsApp channel plugin",
+  "description": "DEPRECATED: Use @openclawos/whatsapp app with runtime: ipc. Kept for backward compatibility.",
   "type": "module",
   "devDependencies": {
     "openclaw": "workspace:*"
   },
+  "deprecated": "Use @openclawos/whatsapp app instead",
   "openclaw": {
     "extensions": [
       "./index.ts"

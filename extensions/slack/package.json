@@ -2,11 +2,12 @@
   "name": "@openclaw/slack",
   "version": "2026.2.15",
   "private": true,
-  "description": "OpenClaw Slack channel plugin",
+  "description": "DEPRECATED: Use @openclawos/slack app with runtime: ipc. Kept for backward compatibility.",
   "type": "module",
   "devDependencies": {
     "openclaw": "workspace:*"
   },
+  "deprecated": "Use @openclawos/slack app instead",
   "openclaw": {
     "extensions": [
       "./index.ts"
