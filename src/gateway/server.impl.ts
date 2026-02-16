@@ -20,6 +20,7 @@ import {
   readConfigFileSnapshot,
   writeConfigFile,
 } from "../config/config.js";
+import { STATE_DIR } from "../config/paths.js";
 import { applyPluginAutoEnable } from "../config/plugin-auto-enable.js";
 import { clearAgentRunContext, onAgentEvent } from "../infra/agent-events.js";
 import {
@@ -56,6 +57,12 @@ import { createAgentEventHandler } from "./server-chat.js";
 import { createGatewayCloseHandler } from "./server-close.js";
 import { buildGatewayCronService } from "./server-cron.js";
 import { startGatewayDiscovery } from "./server-discovery-runtime.js";
+import { initializeIPCHookBridge } from "./server-ipc-bridge.js";
+import {
+  initIPCIntegration,
+  spawnConfiguredApps,
+  type IPCIntegrationHandle,
+} from "./server-ipc.js";
 import { applyGatewayLaneConcurrency } from "./server-lanes.js";
 import { startGatewayMaintenanceTimers } from "./server-maintenance.js";
 import { GATEWAY_EVENTS, listGatewayMethods } from "./server-methods-list.js";
@@ -409,6 +416,38 @@ export async function startGatewayServer(
   const { getRuntimeSnapshot, startChannels, startChannel, stopChannel, markChannelLoggedOut } =
     channelManager;
 
+  // Initialize OpenClawOS IPC server (non-blocking, returns null if kernel not available)
+  let ipcHandle: IPCIntegrationHandle | null = null;
+  if (!minimalTestGateway) {
+    ipcHandle = await initIPCIntegration({
+      log: log.child("ipc"),
+      stateDir: STATE_DIR,
+      workspaceDir: defaultWorkspaceDir,
+      getConfig: (configPath) => {
+        const cfg = loadConfig();
+        if (!configPath) {
+          return cfg;
+        }
+        return configPath
+          .split(".")
+          .reduce((obj, key) => (obj as Record<string, unknown>)?.[key], cfg as unknown);
+      },
+      queueAgent: async (params) => {
+        // Integration with existing agent queue via system events
+        const { enqueueSystemEvent } = await import("../infra/system-events.js");
+        enqueueSystemEvent(params.text, {
+          sessionKey: params.sessionKey,
+        });
+        return { runId: crypto.randomUUID(), queued: true };
+      },
+    });
+    if (ipcHandle) {
+      log.info("OpenClawOS IPC server initialized");
+      // Initialize the hook bridge for forwarding hooks to IPC apps
+      initializeIPCHookBridge(ipcHandle, log.child("ipc-hooks"));
+    }
+  }
+
   if (!minimalTestGateway) {
     const machineDisplayName = await getMachineDisplayName();
     const discovery = await startGatewayDiscovery({
@@ -625,6 +664,16 @@ export async function startGatewayServer(
     }));
   }
 
+  // Spawn configured OpenClawOS apps (if IPC is enabled)
+  if (!minimalTestGateway && ipcHandle) {
+    await spawnConfiguredApps(
+      ipcHandle,
+      cfgAtStart as { apps?: Record<string, { enabled?: boolean }> },
+      defaultWorkspaceDir,
+      log.child("apps"),
+    );
+  }
+
   // Run gateway_start plugin hook (fire-and-forget)
   if (!minimalTestGateway) {
     const hookRunner = getGlobalHookRunner();
@@ -698,6 +747,7 @@ export async function startGatewayServer(
     clients,
     configReloader,
     browserControl,
+    ipcStop: ipcHandle?.stop ?? null,
     wss,
     httpServer,
     httpServers,

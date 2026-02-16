@@ -1,0 +1,50 @@
+{
+  "id": "@openclawos/telegram",
+  "name": "Telegram Channel",
+  "version": "0.1.0",
+  "description": "Telegram bot integration via grammY",
+  "type": "app",
+  "main": "dist/index.js",
+  "protocol": {
+    "version": "1.0"
+  },
+  "capabilities": {
+    "channels": {
+      "provides": ["telegram"]
+    },
+    "hooks": {
+      "subscribes": ["message_sending"]
+    },
+    "resources": {
+      "env": ["TELEGRAM_BOT_TOKEN"],
+      "network": {
+        "hosts": ["api.telegram.org"]
+      }
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "botToken": {
+        "type": "string",
+        "description": "Telegram bot token from @BotFather"
+      },
+      "webhookUrl": {
+        "type": "string",
+        "description": "Optional webhook URL for push mode"
+      }
+    }
+  },
+  "configUiHints": {
+    "botToken": {
+      "label": "Bot Token",
+      "sensitive": true,
+      "description": "Get from @BotFather on Telegram"
+    },
+    "webhookUrl": {
+      "label": "Webhook URL",
+      "description": "Leave empty to use polling mode",
+      "advanced": true
+    }
+  }
+}

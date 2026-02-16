@@ -1,0 +1,55 @@
+{
+  "id": "@openclawos/whatsapp",
+  "name": "WhatsApp Channel",
+  "version": "0.1.0",
+  "description": "WhatsApp integration via Baileys (unofficial API)",
+  "type": "app",
+  "main": "dist/index.js",
+  "protocol": {
+    "version": "1.0"
+  },
+  "capabilities": {
+    "channels": {
+      "provides": ["whatsapp"]
+    },
+    "hooks": {
+      "subscribes": ["message_sending"]
+    },
+    "gateway": {
+      "methods": ["whatsapp.requestQrLogin", "whatsapp.logout"]
+    },
+    "resources": {
+      "network": {
+        "hosts": ["web.whatsapp.com", "mmg.whatsapp.net"]
+      },
+      "fs": {
+        "read": ["~/.openclaw/web-auth"],
+        "write": ["~/.openclaw/web-auth"]
+      }
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "authDir": {
+        "type": "string",
+        "description": "Directory for WhatsApp authentication state"
+      },
+      "selfChatMode": {
+        "type": "boolean",
+        "description": "Enable same-phone setup (bot uses your personal number)"
+      }
+    }
+  },
+  "configUiHints": {
+    "authDir": {
+      "label": "Auth Directory",
+      "description": "Path to store WhatsApp session files",
+      "advanced": true
+    },
+    "selfChatMode": {
+      "label": "Self-Chat Mode",
+      "description": "Use your personal WhatsApp number as the bot"
+    }
+  }
+}

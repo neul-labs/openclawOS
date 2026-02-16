@@ -1,0 +1,49 @@
+{
+  "id": "@openclawos/discord",
+  "name": "Discord Channel",
+  "version": "0.1.0",
+  "description": "Discord bot integration via Carbon SDK",
+  "type": "app",
+  "main": "dist/index.js",
+  "protocol": {
+    "version": "1.0"
+  },
+  "capabilities": {
+    "channels": {
+      "provides": ["discord"]
+    },
+    "hooks": {
+      "subscribes": ["message_sending"]
+    },
+    "resources": {
+      "env": ["DISCORD_BOT_TOKEN"],
+      "network": {
+        "hosts": ["discord.com", "gateway.discord.gg", "cdn.discordapp.com"]
+      }
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "token": {
+        "type": "string",
+        "description": "Discord bot token"
+      },
+      "applicationId": {
+        "type": "string",
+        "description": "Discord application ID"
+      }
+    }
+  },
+  "configUiHints": {
+    "token": {
+      "label": "Bot Token",
+      "sensitive": true,
+      "description": "Token from Discord Developer Portal"
+    },
+    "applicationId": {
+      "label": "Application ID",
+      "description": "Discord application ID"
+    }
+  }
+}

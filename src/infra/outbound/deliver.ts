@@ -22,6 +22,7 @@ import {
   appendAssistantMessageToSessionTranscript,
   resolveMirroredTranscriptText,
 } from "../../config/sessions.js";
+import { forwardHookToIPC } from "../../gateway/server-ipc-bridge.js";
 import { getAgentScopedMediaLocalRoots } from "../../media/local-roots.js";
 import { getGlobalHookRunner } from "../../plugins/hook-runner-global.js";
 import { markdownToSignalTextChunks, type SignalTextStyleRange } from "../../signal/format.js";
@@ -498,6 +499,15 @@ async function deliverOutboundPayloadsCore(
           // Don't block delivery on hook failure
         }
       }
+
+      // Forward to IPC apps that subscribed to message_sending
+      // This allows process-isolated channel apps to receive outbound messages
+      forwardHookToIPC("message_sending", {
+        to,
+        content: payloadSummary.text,
+        metadata: { channel, accountId, mediaUrls: payloadSummary.mediaUrls },
+        channelId: channel,
+      });
 
       params.onPayload?.(payloadSummary);
       if (handler.sendPayload && effectivePayload.channelData) {

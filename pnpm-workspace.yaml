@@ -1,8 +1,18 @@
 packages:
+  # Core OpenClawOS packages
+  - packages/protocol
+  - packages/kernel
+  - packages/sdk
+  # Root package
   - .
+  # UI
   - ui
+  # Other packages
   - packages/*
+  # Extensions (legacy, being migrated to apps)
   - extensions/*
+  # Apps (process-isolated applications)
+  - apps/*
 
 onlyBuiltDependencies:
   - "@lydell/node-pty"

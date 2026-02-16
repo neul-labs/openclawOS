@@ -42,6 +42,12 @@ export type TelegramCustomCommand = {
 };
 
 export type TelegramAccountConfig = {
+  /**
+   * Runtime mode for this channel:
+   * - "in-process" (default): runs within the gateway process
+   * - "ipc": runs as an isolated OpenClawOS app via IPC
+   */
+  runtime?: "in-process" | "ipc";
   /** Optional display name for this account (used in CLI/UI lists). */
   name?: string;
   /** Optional provider capability tags used for agent/runtime guidance. */

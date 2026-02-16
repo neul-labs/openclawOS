@@ -26,6 +26,8 @@ export function createGatewayCloseHandler(params: {
   clients: Set<{ socket: { close: (code: number, reason: string) => void } }>;
   configReloader: { stop: () => Promise<void> };
   browserControl: { stop: () => Promise<void> } | null;
+  /** OpenClawOS IPC server stop function */
+  ipcStop: (() => Promise<void>) | null;
   wss: WebSocketServer;
   httpServer: HttpServer;
   httpServers?: HttpServer[];
@@ -63,6 +65,13 @@ export function createGatewayCloseHandler(params: {
     }
     for (const plugin of listChannelPlugins()) {
       await params.stopChannel(plugin.id);
+    }
+    if (params.ipcStop) {
+      try {
+        await params.ipcStop();
+      } catch {
+        /* ignore */
+      }
     }
     if (params.pluginServices) {
       await params.pluginServices.stop().catch(() => {});

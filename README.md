@@ -129,6 +129,47 @@ Run `openclaw doctor` to surface risky/misconfigured DM policies.
 - **[Companion apps](https://docs.openclaw.ai/platforms/macos)** — macOS menu bar app + iOS/Android [nodes](https://docs.openclaw.ai/nodes).
 - **[Onboarding](https://docs.openclaw.ai/start/wizard) + [skills](https://docs.openclaw.ai/tools/skills)** — wizard-driven setup with bundled/managed/workspace skills.
 
+## Architecture (OpenClawOS)
+
+OpenClaw is evolving into **OpenClawOS** — an OS-like architecture with a stable kernel and extensible applications.
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                              OpenClawOS                                 │
+├─────────────────────────────────────────────────────────────────────────┤
+│  Apps (Process-isolated)     │  Skills (In-process)  │  Agent Templates │
+│  ├── Telegram                │  ├── coding-agent     │  ├── @os/coder   │
+│  ├── Discord                 │  ├── canvas           │  ├── @os/writer  │
+│  ├── Slack                   │  ├── memory           │  └── @community/ │
+│  ├── WhatsApp                │  └── browser          │                  │
+│  └── Extensions...           │                       │                  │
+├─────────────────────────────────────────────────────────────────────────┤
+│                           Kernel                                        │
+│  ├── Gateway (WebSocket + HTTP)                                         │
+│  ├── Agent Runtime (Pi integration)                                     │
+│  ├── Session Management                                                 │
+│  ├── IPC Server (JSONL over Unix sockets)                               │
+│  └── Process Supervisor                                                 │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### Package Types
+
+| Type           | Isolation  | Description                                        |
+| -------------- | ---------- | -------------------------------------------------- |
+| **Apps**       | Process    | Channels and plugins running in isolated processes |
+| **Skills**     | In-process | Agent tools loaded by runtime for low latency      |
+| **Agents**     | Config     | Pre-configured personas with prompts and skills    |
+| **Extensions** | In-process | Kernel enhancements (providers, gateway methods)   |
+
+### SDK Packages
+
+- `@openclawos/kernel` — Core runtime (gateway, agent, sessions)
+- `@openclawos/sdk` — Build apps, skills, agents, extensions
+- `@openclawos/protocol` — IPC types and schemas
+
+See [Architecture Guide](docs/architecture/) for details.
+
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=openclaw/openclaw&type=date&legend=top-left)](https://www.star-history.com/#openclaw/openclaw&type=date&legend=top-left)

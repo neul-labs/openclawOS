@@ -1,0 +1,44 @@
+{
+  "name": "@openclawos/kernel",
+  "version": "0.1.0",
+  "description": "OpenClawOS kernel - IPC server, process supervisor, and app registry",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "main": "dist/index.mjs",
+  "types": "dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    },
+    "./ipc": {
+      "types": "./dist/ipc/index.d.mts",
+      "default": "./dist/ipc/index.mjs"
+    },
+    "./supervisor": {
+      "types": "./dist/supervisor/index.d.mts",
+      "default": "./dist/supervisor/index.mjs"
+    },
+    "./registry": {
+      "types": "./dist/registry/index.d.mts",
+      "default": "./dist/registry/index.mjs"
+    }
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@openclawos/protocol": "workspace:*"
+  },
+  "devDependencies": {
+    "tsdown": "^0.20.3",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

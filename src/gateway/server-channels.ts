@@ -113,6 +113,21 @@ export function createChannelManager(opts: ChannelManagerOptions): ChannelManage
           return;
         }
         const account = plugin.config.resolveAccount(cfg, id);
+
+        // Check if channel should run via IPC instead of in-process
+        const runtimeMode = (account as { runtime?: "in-process" | "ipc" })?.runtime;
+        if (runtimeMode === "ipc") {
+          const log = channelLogs[channelId];
+          log.info?.(`[${id}] channel running via IPC app, skipping in-process startup`);
+          setRuntime(channelId, id, {
+            accountId: id,
+            running: true,
+            lastStartAt: Date.now(),
+            lastError: null,
+          });
+          return;
+        }
+
         const enabled = plugin.config.isEnabled
           ? plugin.config.isEnabled(account, cfg)
           : isAccountEnabled(account);

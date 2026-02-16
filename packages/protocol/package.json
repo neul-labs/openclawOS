@@ -1,0 +1,44 @@
+{
+  "name": "@openclawos/protocol",
+  "version": "0.1.0",
+  "description": "OpenClawOS IPC protocol types and schemas",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "main": "dist/index.mjs",
+  "types": "dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    },
+    "./messages": {
+      "types": "./dist/messages.d.mts",
+      "default": "./dist/messages.mjs"
+    },
+    "./manifest": {
+      "types": "./dist/manifest.d.mts",
+      "default": "./dist/manifest.mjs"
+    },
+    "./capabilities": {
+      "types": "./dist/capabilities.d.mts",
+      "default": "./dist/capabilities.mjs"
+    }
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "tsdown": "^0.20.3",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

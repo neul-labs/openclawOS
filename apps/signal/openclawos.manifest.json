@@ -1,0 +1,67 @@
+{
+  "id": "@openclawos/signal",
+  "name": "Signal Channel",
+  "version": "0.1.0",
+  "description": "Signal messenger integration via signal-cli daemon",
+  "type": "app",
+  "main": "dist/index.js",
+  "protocol": {
+    "version": "1.0"
+  },
+  "capabilities": {
+    "channels": {
+      "provides": ["signal"]
+    },
+    "hooks": {
+      "subscribes": ["message_sending"]
+    },
+    "resources": {
+      "network": {
+        "hosts": ["localhost", "127.0.0.1"]
+      }
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "httpUrl": {
+        "type": "string",
+        "description": "Full URL for signal-cli HTTP daemon (e.g., http://127.0.0.1:8080)"
+      },
+      "httpHost": {
+        "type": "string",
+        "description": "HTTP host for signal-cli daemon"
+      },
+      "httpPort": {
+        "type": "number",
+        "description": "HTTP port for signal-cli daemon"
+      },
+      "account": {
+        "type": "string",
+        "description": "E.164 phone number for signal-cli account"
+      }
+    }
+  },
+  "configUiHints": {
+    "httpUrl": {
+      "label": "HTTP URL",
+      "description": "Full URL to signal-cli daemon",
+      "placeholder": "http://127.0.0.1:8080"
+    },
+    "httpHost": {
+      "label": "HTTP Host",
+      "description": "Host for signal-cli daemon (default: 127.0.0.1)",
+      "advanced": true
+    },
+    "httpPort": {
+      "label": "HTTP Port",
+      "description": "Port for signal-cli daemon (default: 8080)",
+      "advanced": true
+    },
+    "account": {
+      "label": "Account",
+      "description": "E.164 phone number (e.g., +1234567890)",
+      "sensitive": true
+    }
+  }
+}
