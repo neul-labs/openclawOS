@@ -20,6 +20,43 @@ export type PackageStatus =
   | "error"
   | "not_applicable";
 
+export type PackageCapabilities = {
+  channels?: {
+    provides?: string[];
+    requires?: string[];
+  };
+  tools?: {
+    provides?: string[];
+    requires?: string[];
+  };
+  hooks?: {
+    subscribes?: string[];
+    intercepts?: string[];
+  };
+  gateway?: {
+    methods?: string[];
+    httpRoutes?: string[];
+  };
+  providers?: {
+    provides?: string[];
+    models?: string[];
+  };
+  resources?: {
+    env?: string[];
+    fs?: {
+      read?: string[];
+      write?: string[];
+    };
+    network?: {
+      hosts?: string[];
+    };
+  };
+  security?: {
+    sandboxed?: boolean;
+    trustLevel?: string;
+  };
+};
+
 export type PackageInfo = {
   id: string;
   name: string;
@@ -38,6 +75,7 @@ export type PackageInfo = {
   latestVersion?: string;
   status?: PackageStatus;
   lastError?: string;
+  capabilities?: PackageCapabilities;
 };
 
 export type PackageCategory = "all" | "apps" | "skills" | "agents" | "extensions";
@@ -60,6 +98,8 @@ export type AppStoreState = {
   appstoreSelectedId: string | null;
   appstoreBusyKey: string | null;
   appstoreMessages: AppStoreMessageMap;
+  /** Package pending install confirmation (for modal) */
+  appstoreInstallPending: PackageInfo | null;
 };
 
 // =============================================================================
@@ -76,6 +116,7 @@ export function createAppStoreInitialState(): Partial<AppStoreState> {
     appstoreSelectedId: null,
     appstoreBusyKey: null,
     appstoreMessages: {},
+    appstoreInstallPending: null,
   };
 }
 
@@ -282,10 +323,132 @@ export async function configurePackage(
 }
 
 /**
+ * Start a package (app).
+ */
+export async function startPackage(state: AppStoreState, packageId: string): Promise<void> {
+  if (!state.client || !state.connected) {
+    return;
+  }
+
+  state.appstoreBusyKey = packageId;
+  state.appstoreError = null;
+
+  try {
+    const res = await state.client.request<{ ok: boolean; error?: string }>("apps.start", {
+      packageId,
+    });
+
+    if (res?.ok) {
+      setMessage(state, packageId, { kind: "success", message: "Started" });
+      await loadPackages(state);
+    } else {
+      setMessage(state, packageId, { kind: "error", message: res?.error || "Start failed" });
+    }
+  } catch (err) {
+    const message = getErrorMessage(err);
+    state.appstoreError = message;
+    setMessage(state, packageId, { kind: "error", message });
+  } finally {
+    state.appstoreBusyKey = null;
+  }
+}
+
+/**
+ * Stop a package (app).
+ */
+export async function stopPackage(state: AppStoreState, packageId: string): Promise<void> {
+  if (!state.client || !state.connected) {
+    return;
+  }
+
+  state.appstoreBusyKey = packageId;
+  state.appstoreError = null;
+
+  try {
+    const res = await state.client.request<{ ok: boolean; error?: string }>("apps.stop", {
+      packageId,
+    });
+
+    if (res?.ok) {
+      setMessage(state, packageId, { kind: "success", message: "Stopped" });
+      await loadPackages(state);
+    } else {
+      setMessage(state, packageId, { kind: "error", message: res?.error || "Stop failed" });
+    }
+  } catch (err) {
+    const message = getErrorMessage(err);
+    state.appstoreError = message;
+    setMessage(state, packageId, { kind: "error", message });
+  } finally {
+    state.appstoreBusyKey = null;
+  }
+}
+
+/**
+ * Restart a package (app).
+ */
+export async function restartPackage(state: AppStoreState, packageId: string): Promise<void> {
+  if (!state.client || !state.connected) {
+    return;
+  }
+
+  state.appstoreBusyKey = packageId;
+  state.appstoreError = null;
+
+  try {
+    const res = await state.client.request<{ ok: boolean; error?: string }>("apps.restart", {
+      packageId,
+    });
+
+    if (res?.ok) {
+      setMessage(state, packageId, { kind: "success", message: "Restarted" });
+      await loadPackages(state);
+    } else {
+      setMessage(state, packageId, { kind: "error", message: res?.error || "Restart failed" });
+    }
+  } catch (err) {
+    const message = getErrorMessage(err);
+    state.appstoreError = message;
+    setMessage(state, packageId, { kind: "error", message });
+  } finally {
+    state.appstoreBusyKey = null;
+  }
+}
+
+/**
  * Clear a message for a package.
  */
 export function clearMessage(state: AppStoreState, packageId: string): void {
   setMessage(state, packageId, undefined);
+}
+
+/**
+ * Show install confirmation modal for a package.
+ */
+export function showInstallModal(state: AppStoreState, packageId: string): void {
+  const pkg = state.appstorePackages?.find((p) => p.id === packageId);
+  if (pkg) {
+    state.appstoreInstallPending = pkg;
+  }
+}
+
+/**
+ * Cancel install modal.
+ */
+export function cancelInstallModal(state: AppStoreState): void {
+  state.appstoreInstallPending = null;
+}
+
+/**
+ * Confirm install from modal.
+ */
+export async function confirmInstall(state: AppStoreState): Promise<void> {
+  const pkg = state.appstoreInstallPending;
+  if (!pkg) {
+    return;
+  }
+  state.appstoreInstallPending = null;
+  await installPackage(state, pkg.id);
 }
 
 /**

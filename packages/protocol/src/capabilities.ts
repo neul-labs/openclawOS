@@ -32,6 +32,9 @@ export interface PackageCapabilities {
 
   /** Security settings */
   security?: SecurityCapabilities;
+
+  /** UI extension capabilities */
+  ui?: UiCapabilities;
 }
 
 // =============================================================================
@@ -194,6 +197,82 @@ export type TrustLevel =
   | "untrusted"; // Sandboxed, minimal permissions
 
 // =============================================================================
+// UI Capabilities
+// =============================================================================
+
+/**
+ * UI extension capabilities for apps that contribute to the UI.
+ */
+export interface UiCapabilities {
+  /** Tabs to add to navigation */
+  tabs?: UiTabConfig[];
+  /** Web components to register */
+  components?: UiComponentConfig[];
+  /** Settings sections to add */
+  settings?: UiSettingsConfig[];
+}
+
+/**
+ * Configuration for a UI tab contributed by an app.
+ */
+export interface UiTabConfig {
+  /** Tab ID (unique within app) */
+  id: string;
+  /** Tab title in sidebar */
+  title: string;
+  /** Lucide icon name */
+  icon?: string;
+  /** How to render the tab content */
+  render: UiTabRender;
+  /** Position in sidebar */
+  position?: "top" | "bottom" | "after:chat" | "after:channels";
+  /** Badge configuration to show unread counts etc */
+  badge?: UiTabBadge;
+}
+
+/**
+ * Tab render mode - how the tab content is displayed.
+ */
+export type UiTabRender =
+  | { type: "iframe"; src: string } // App-hosted iframe
+  | { type: "component"; tag: string } // Web component from this app
+  | { type: "builtin"; view: string }; // Built-in view (for core apps)
+
+/**
+ * Badge configuration for a tab (e.g., unread count).
+ */
+export interface UiTabBadge {
+  /** Gateway method to call to get badge count */
+  method: string;
+  /** Update interval in seconds (default: 30) */
+  interval?: number;
+}
+
+/**
+ * Configuration for a web component contributed by an app.
+ */
+export interface UiComponentConfig {
+  /** Custom element tag name (must include hyphen) */
+  tag: string;
+  /** JavaScript module to load (relative to app) */
+  module: string;
+  /** Where this component can be used */
+  scope: "tab" | "widget" | "settings" | "global";
+}
+
+/**
+ * Configuration for a settings section contributed by an app.
+ */
+export interface UiSettingsConfig {
+  /** Settings section ID */
+  id: string;
+  /** Section title */
+  title: string;
+  /** Render type */
+  render: { type: "iframe"; src: string } | { type: "component"; tag: string };
+}
+
+// =============================================================================
 // Capability Validation
 // =============================================================================
 
@@ -218,7 +297,10 @@ export type CapabilityType =
   | { type: "fs_read"; path: string }
   | { type: "fs_write"; path: string }
   | { type: "network"; host: string }
-  | { type: "env"; name: string };
+  | { type: "env"; name: string }
+  | { type: "ui_tab"; tabId: string }
+  | { type: "ui_component"; tag: string }
+  | { type: "ui_settings"; sectionId: string };
 
 // =============================================================================
 // Capability Helpers
@@ -321,6 +403,25 @@ export function extractProvidedCapabilities(capabilities: PackageCapabilities): 
   if (capabilities.providers?.provides) {
     for (const id of capabilities.providers.provides) {
       provided.push({ type: "provider", id });
+    }
+  }
+
+  // UI capabilities
+  if (capabilities.ui?.tabs) {
+    for (const tab of capabilities.ui.tabs) {
+      provided.push({ type: "ui_tab", tabId: tab.id });
+    }
+  }
+
+  if (capabilities.ui?.components) {
+    for (const component of capabilities.ui.components) {
+      provided.push({ type: "ui_component", tag: component.tag });
+    }
+  }
+
+  if (capabilities.ui?.settings) {
+    for (const setting of capabilities.ui.settings) {
+      provided.push({ type: "ui_settings", sectionId: setting.id });
     }
   }
 

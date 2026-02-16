@@ -1,0 +1,25 @@
+{
+  "name": "@openclawos/app-mattermost",
+  "version": "0.1.0",
+  "description": "Mattermost channel app for OpenClawOS",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@openclawos/sdk": "workspace:*",
+    "@openclawos/protocol": "workspace:*"
+  },
+  "devDependencies": {
+    "tsdown": "^0.20.3",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "id": "@openclawos/googlechat",
+  "name": "Google Chat Channel",
+  "version": "0.1.0",
+  "description": "Google Chat integration",
+  "type": "app",
+  "main": "dist/index.js",
+  "protocol": {
+    "version": "1.0"
+  },
+  "capabilities": {
+    "channels": {
+      "provides": ["googlechat"]
+    },
+    "hooks": {
+      "subscribes": ["message_sending"]
+    },
+    "resources": {
+      "env": ["GOOGLE_CHAT_SERVICE_ACCOUNT_KEY"],
+      "network": {
+        "hosts": ["*"]
+      }
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "serviceAccountKey": {
+        "type": "string",
+        "description": "Google Cloud service account key (JSON)"
+      },
+      "projectId": {
+        "type": "string",
+        "description": "Google Cloud project ID"
+      }
+    },
+    "required": ["serviceAccountKey", "projectId"]
+  },
+  "configUiHints": {
+    "serviceAccountKey": {
+      "label": "Service Account Key",
+      "description": "Google Cloud service account credentials (JSON format)",
+      "sensitive": true
+    },
+    "projectId": {
+      "label": "Project ID",
+      "description": "Google Cloud project ID for the Chat API"
+    }
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "id": "@openclawos/diagnostics",
+  "name": "Diagnostics (OpenTelemetry)",
+  "version": "0.1.0",
+  "description": "OpenTelemetry metrics and traces export",
+  "type": "app",
+  "main": "dist/index.js",
+  "protocol": {
+    "version": "1.0"
+  },
+  "capabilities": {
+    "hooks": {
+      "subscribes": ["agent_end", "llm_input", "llm_output"]
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "enabled": {
+        "type": "boolean",
+        "description": "Enable OpenTelemetry export",
+        "default": false
+      },
+      "otlpEndpoint": {
+        "type": "string",
+        "description": "OTLP endpoint URL (e.g., http://localhost:4318)"
+      },
+      "serviceName": {
+        "type": "string",
+        "description": "Service name for traces and metrics",
+        "default": "openclawos"
+      }
+    },
+    "required": ["otlpEndpoint"]
+  },
+  "configUiHints": {
+    "enabled": {
+      "label": "Enable Diagnostics",
+      "description": "Toggle OpenTelemetry export on/off"
+    },
+    "otlpEndpoint": {
+      "label": "OTLP Endpoint",
+      "description": "OpenTelemetry Protocol endpoint (e.g., http://localhost:4318)"
+    },
+    "serviceName": {
+      "label": "Service Name",
+      "description": "Identifies this service in traces and metrics",
+      "advanced": true
+    }
+  }
+}

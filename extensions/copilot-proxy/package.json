@@ -2,11 +2,12 @@
   "name": "@openclaw/copilot-proxy",
   "version": "2026.2.15",
   "private": true,
-  "description": "OpenClaw Copilot Proxy provider plugin",
+  "description": "OpenClaw Copilot Proxy provider plugin (DEPRECATED - use @openclawos/app-copilot-proxy)",
   "type": "module",
   "devDependencies": {
     "openclaw": "workspace:*"
   },
+  "deprecated": "This extension is deprecated. Use @openclawos/app-copilot-proxy instead.",
   "openclaw": {
     "extensions": [
       "./index.ts"

@@ -1,7 +1,7 @@
 {
   "name": "@openclaw/diagnostics-otel",
   "version": "2026.2.15",
-  "description": "OpenClaw diagnostics OpenTelemetry exporter",
+  "description": "OpenClaw diagnostics OpenTelemetry exporter (DEPRECATED: Use @openclawos/app-diagnostics instead)",
   "type": "module",
   "dependencies": {
     "@opentelemetry/api": "^1.9.0",
@@ -19,6 +19,7 @@
   "devDependencies": {
     "openclaw": "workspace:*"
   },
+  "deprecated": "This package is deprecated. Please use @openclawos/app-diagnostics instead.",
   "openclaw": {
     "extensions": [
       "./index.ts"

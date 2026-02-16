@@ -13,9 +13,15 @@ import {
   installPackage,
   uninstallPackage,
   setPackageEnabled,
+  startPackage,
+  stopPackage,
+  restartPackage,
   setFilter as setAppstoreFilter,
   setCategory as setAppstoreCategory,
   selectPackage,
+  showInstallModal,
+  cancelInstallModal,
+  confirmInstall,
 } from "./controllers/appstore.ts";
 import { loadChannels } from "./controllers/channels.ts";
 import { loadChatHistory } from "./controllers/chat.ts";
@@ -722,12 +728,18 @@ export function renderApp(state: AppViewState) {
                 selectedId: state.appstoreSelectedId,
                 busyKey: state.appstoreBusyKey,
                 messages: state.appstoreMessages,
+                installPending: state.appstoreInstallPending,
                 onFilterChange: (next) => setAppstoreFilter(state, next),
                 onCategoryChange: (next) => setAppstoreCategory(state, next),
                 onSelect: (id) => selectPackage(state, id),
-                onInstall: (id) => installPackage(state, id),
+                onShowInstallModal: (id) => showInstallModal(state, id),
+                onConfirmInstall: () => confirmInstall(state),
+                onCancelInstall: () => cancelInstallModal(state),
                 onUninstall: (id) => uninstallPackage(state, id),
                 onToggleEnabled: (id, enabled) => setPackageEnabled(state, id, enabled),
+                onStart: (id) => startPackage(state, id),
+                onStop: (id) => stopPackage(state, id),
+                onRestart: (id) => restartPackage(state, id),
                 onRefresh: () => loadPackages(state, { clearMessages: true }),
               })
             : nothing

@@ -1,0 +1,70 @@
+{
+  "id": "@openclawos/zalo",
+  "name": "Zalo OA Channel",
+  "version": "0.1.0",
+  "description": "Zalo Official Account integration",
+  "type": "app",
+  "main": "dist/index.js",
+  "protocol": {
+    "version": "1.0"
+  },
+  "capabilities": {
+    "channels": {
+      "provides": ["zalo"]
+    },
+    "hooks": {
+      "subscribes": ["message_sending"]
+    },
+    "resources": {
+      "env": ["ZALO_ACCESS_TOKEN", "ZALO_REFRESH_TOKEN"],
+      "network": {
+        "hosts": ["*"]
+      }
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "appId": {
+        "type": "string",
+        "description": "Zalo OA App ID"
+      },
+      "secretKey": {
+        "type": "string",
+        "description": "Zalo OA Secret Key"
+      },
+      "accessToken": {
+        "type": "string",
+        "description": "Zalo OA Access Token"
+      },
+      "refreshToken": {
+        "type": "string",
+        "description": "Zalo OA Refresh Token"
+      }
+    },
+    "required": ["appId", "secretKey"]
+  },
+  "configUiHints": {
+    "appId": {
+      "label": "App ID",
+      "description": "Your Zalo Official Account App ID"
+    },
+    "secretKey": {
+      "label": "Secret Key",
+      "sensitive": true,
+      "description": "Your Zalo OA Secret Key"
+    },
+    "accessToken": {
+      "label": "Access Token",
+      "sensitive": true,
+      "description": "OAuth access token for API calls",
+      "advanced": true
+    },
+    "refreshToken": {
+      "label": "Refresh Token",
+      "sensitive": true,
+      "description": "OAuth refresh token to renew access",
+      "advanced": true
+    }
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "id": "@openclawos/nextcloud-talk",
+  "name": "Nextcloud Talk Channel",
+  "version": "0.1.0",
+  "description": "Nextcloud Talk chat integration",
+  "type": "app",
+  "main": "dist/index.js",
+  "protocol": {
+    "version": "1.0"
+  },
+  "capabilities": {
+    "channels": {
+      "provides": ["nextcloud-talk"]
+    },
+    "hooks": {
+      "subscribes": ["message_sending"]
+    },
+    "resources": {
+      "env": ["NEXTCLOUD_APP_PASSWORD"],
+      "network": {
+        "hosts": ["*"]
+      }
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "serverUrl": {
+        "type": "string",
+        "description": "Nextcloud server URL (e.g., https://cloud.example.com)"
+      },
+      "username": {
+        "type": "string",
+        "description": "Nextcloud username"
+      },
+      "appPassword": {
+        "type": "string",
+        "description": "Nextcloud app password for authentication"
+      }
+    },
+    "required": ["serverUrl", "username", "appPassword"]
+  },
+  "configUiHints": {
+    "serverUrl": {
+      "label": "Server URL",
+      "description": "Your Nextcloud server URL (e.g., https://cloud.example.com)"
+    },
+    "username": {
+      "label": "Username",
+      "description": "Your Nextcloud username"
+    },
+    "appPassword": {
+      "label": "App Password",
+      "sensitive": true,
+      "description": "Generate an app password in Nextcloud Settings > Security"
+    }
+  }
+}

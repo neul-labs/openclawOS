@@ -2,11 +2,12 @@
   "name": "@openclaw/imessage",
   "version": "2026.2.15",
   "private": true,
-  "description": "OpenClaw iMessage channel plugin",
+  "description": "OpenClaw iMessage channel plugin (DEPRECATED - use @openclawos/app-imessage)",
   "type": "module",
   "devDependencies": {
     "openclaw": "workspace:*"
   },
+  "deprecated": "This extension has been migrated to @openclawos/app-imessage in /apps/imessage/",
   "openclaw": {
     "extensions": [
       "./index.ts"

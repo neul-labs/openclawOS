@@ -1,0 +1,39 @@
+{
+  "id": "@openclawos/open-prose",
+  "name": "Open Prose",
+  "version": "0.1.0",
+  "description": "Prose editing tools for OpenClawOS",
+  "type": "app",
+  "main": "dist/index.js",
+  "protocol": {
+    "version": "1.0"
+  },
+  "capabilities": {
+    "tools": {
+      "provides": ["prose_edit", "prose_rewrite", "prose_summarize", "prose_expand"]
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "style": {
+        "type": "string",
+        "description": "Default writing style preference"
+      },
+      "language": {
+        "type": "string",
+        "description": "Default language for prose operations"
+      }
+    }
+  },
+  "configUiHints": {
+    "style": {
+      "label": "Writing Style",
+      "description": "Default style for prose editing (e.g., formal, casual, technical)"
+    },
+    "language": {
+      "label": "Language",
+      "description": "Default language for prose operations (e.g., en, es, fr)"
+    }
+  }
+}

@@ -92,15 +92,14 @@ export class AppSupervisor extends EventEmitter<SupervisorEvents> {
       env: config?.env,
     };
 
+    // Build filtered environment variables
+    // Only pass env vars explicitly declared in manifest to prevent secret leakage
+    const filteredEnv = this.buildFilteredEnv(manifest, processConfig.env);
+
     // Fork the process
     const child = fork(entryPoint, [], {
       cwd: appDir,
-      env: {
-        ...process.env,
-        ...processConfig.env,
-        OPENCLAWOS_KERNEL_SOCKET: this.options.socketPath,
-        OPENCLAWOS_APP_ID: appId,
-      },
+      env: filteredEnv,
       stdio: ["pipe", "pipe", "pipe", "ipc"],
       detached: false,
     });
@@ -242,6 +241,50 @@ export class AppSupervisor extends EventEmitter<SupervisorEvents> {
       app.status = "running";
       this.emit("ready", appId);
     }
+  }
+
+  /**
+   * Build filtered environment variables for an app process.
+   * Only passes env vars declared in the manifest's capabilities.resources.env
+   * plus required system vars to prevent secret leakage.
+   */
+  private buildFilteredEnv(
+    manifest: PackageManifest,
+    extraEnv?: Record<string, string>,
+  ): Record<string, string> {
+    const env: Record<string, string> = {};
+
+    // Always include essential system vars for Node.js to function
+    const systemVars = ["NODE_ENV", "PATH", "HOME", "LANG", "LC_ALL", "TZ"];
+    for (const key of systemVars) {
+      if (process.env[key]) {
+        env[key] = process.env[key]!;
+      }
+    }
+
+    // Include OpenClawOS system vars
+    env.OPENCLAWOS_KERNEL_SOCKET = this.options.socketPath;
+    env.OPENCLAWOS_APP_ID = manifest.id;
+
+    // Only include env vars explicitly declared in manifest
+    const declaredEnvVars = (manifest.capabilities as Record<string, unknown> | undefined)
+      ?.resources;
+    const envAllowlist = (declaredEnvVars as Record<string, unknown> | undefined)?.env;
+
+    if (Array.isArray(envAllowlist)) {
+      for (const varName of envAllowlist) {
+        if (typeof varName === "string" && process.env[varName]) {
+          env[varName] = process.env[varName]!;
+        }
+      }
+    }
+
+    // Add extra env vars from config (these are trusted, set by admin)
+    if (extraEnv) {
+      Object.assign(env, extraEnv);
+    }
+
+    return env;
   }
 
   private setupProcessHandlers(app: AppProcess, child: ChildProcess): void {

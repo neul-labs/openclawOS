@@ -1,0 +1,45 @@
+{
+  "id": "@openclawos/lobster",
+  "name": "Lobster",
+  "version": "0.1.0",
+  "description": "Lobster workflow tool integration (typed pipelines + resumable approvals)",
+  "type": "app",
+  "main": "dist/index.js",
+  "protocol": {
+    "version": "1.0"
+  },
+  "capabilities": {
+    "resources": {
+      "network": {
+        "hosts": ["*"]
+      }
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "apiKey": {
+        "type": "string",
+        "description": "Lobster API key for authentication"
+      },
+      "endpoint": {
+        "type": "string",
+        "description": "Lobster API endpoint URL",
+        "default": "https://api.lobster.dev"
+      }
+    },
+    "required": ["apiKey"]
+  },
+  "configUiHints": {
+    "apiKey": {
+      "label": "API Key",
+      "sensitive": true,
+      "description": "Your Lobster API key"
+    },
+    "endpoint": {
+      "label": "API Endpoint",
+      "description": "Lobster API endpoint URL",
+      "advanced": true
+    }
+  }
+}

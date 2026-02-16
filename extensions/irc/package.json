@@ -1,11 +1,13 @@
 {
   "name": "@openclaw/irc",
   "version": "2026.2.15",
-  "description": "OpenClaw IRC channel plugin",
+  "private": true,
+  "description": "DEPRECATED: Use @openclawos/irc app with runtime: ipc. Kept for backward compatibility.",
   "type": "module",
   "devDependencies": {
     "openclaw": "workspace:*"
   },
+  "deprecated": "Use @openclawos/irc app instead",
   "openclaw": {
     "extensions": [
       "./index.ts"

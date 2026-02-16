@@ -1,0 +1,44 @@
+{
+  "id": "@openclawos/llm-task",
+  "name": "LLM Task",
+  "version": "0.1.0",
+  "description": "LLM task execution plugin",
+  "type": "app",
+  "main": "dist/index.js",
+  "protocol": {
+    "version": "1.0"
+  },
+  "capabilities": {
+    "tools": {
+      "provides": ["execute_task", "list_tasks", "cancel_task"]
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "maxConcurrent": {
+        "type": "integer",
+        "description": "Maximum number of concurrent tasks",
+        "default": 5,
+        "minimum": 1,
+        "maximum": 50
+      },
+      "timeout": {
+        "type": "integer",
+        "description": "Task timeout in milliseconds",
+        "default": 300000,
+        "minimum": 1000
+      }
+    }
+  },
+  "configUiHints": {
+    "maxConcurrent": {
+      "label": "Max Concurrent Tasks",
+      "description": "Maximum number of tasks that can run simultaneously"
+    },
+    "timeout": {
+      "label": "Task Timeout",
+      "description": "Maximum time (in ms) a task can run before being cancelled"
+    }
+  }
+}

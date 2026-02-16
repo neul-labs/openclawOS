@@ -31,6 +31,68 @@ export const PackageStatusSchema = Type.Union([
 // Package Info
 // =============================================================================
 
+// =============================================================================
+// Capabilities Schema (for install modal display)
+// =============================================================================
+
+export const PackageCapabilitiesSchema = Type.Object(
+  {
+    channels: Type.Optional(
+      Type.Object({
+        provides: Type.Optional(Type.Array(Type.String())),
+        requires: Type.Optional(Type.Array(Type.String())),
+      }),
+    ),
+    tools: Type.Optional(
+      Type.Object({
+        provides: Type.Optional(Type.Array(Type.String())),
+        requires: Type.Optional(Type.Array(Type.String())),
+      }),
+    ),
+    hooks: Type.Optional(
+      Type.Object({
+        subscribes: Type.Optional(Type.Array(Type.String())),
+        intercepts: Type.Optional(Type.Array(Type.String())),
+      }),
+    ),
+    gateway: Type.Optional(
+      Type.Object({
+        methods: Type.Optional(Type.Array(Type.String())),
+        httpRoutes: Type.Optional(Type.Array(Type.String())),
+      }),
+    ),
+    providers: Type.Optional(
+      Type.Object({
+        provides: Type.Optional(Type.Array(Type.String())),
+        models: Type.Optional(Type.Array(Type.String())),
+      }),
+    ),
+    resources: Type.Optional(
+      Type.Object({
+        env: Type.Optional(Type.Array(Type.String())),
+        fs: Type.Optional(
+          Type.Object({
+            read: Type.Optional(Type.Array(Type.String())),
+            write: Type.Optional(Type.Array(Type.String())),
+          }),
+        ),
+        network: Type.Optional(
+          Type.Object({
+            hosts: Type.Optional(Type.Array(Type.String())),
+          }),
+        ),
+      }),
+    ),
+    security: Type.Optional(
+      Type.Object({
+        sandboxed: Type.Optional(Type.Boolean()),
+        trustLevel: Type.Optional(Type.String()),
+      }),
+    ),
+  },
+  { additionalProperties: true },
+);
+
 export const PackageInfoSchema = Type.Object(
   {
     id: NonEmptyString,
@@ -50,6 +112,7 @@ export const PackageInfoSchema = Type.Object(
     latestVersion: Type.Optional(Type.String()),
     status: Type.Optional(PackageStatusSchema),
     lastError: Type.Optional(Type.String()),
+    capabilities: Type.Optional(PackageCapabilitiesSchema),
   },
   { additionalProperties: false },
 );
@@ -243,10 +306,93 @@ export const AppsStatusResultSchema = Type.Object(
 );
 
 // =============================================================================
+// apps.getUiManifest
+// =============================================================================
+
+export const UiTabRenderSchema = Type.Union([
+  Type.Object({ type: Type.Literal("iframe"), src: Type.String() }),
+  Type.Object({ type: Type.Literal("component"), tag: Type.String() }),
+  Type.Object({ type: Type.Literal("builtin"), view: Type.String() }),
+]);
+
+export const UiTabBadgeSchema = Type.Object({
+  method: Type.String(),
+  interval: Type.Optional(Type.Integer({ minimum: 1 })),
+});
+
+export const UiTabInfoSchema = Type.Object({
+  packageId: NonEmptyString,
+  id: NonEmptyString,
+  title: Type.String(),
+  icon: Type.Optional(Type.String()),
+  render: UiTabRenderSchema,
+  position: Type.Optional(
+    Type.Union([
+      Type.Literal("top"),
+      Type.Literal("bottom"),
+      Type.Literal("after:chat"),
+      Type.Literal("after:channels"),
+    ]),
+  ),
+  badge: Type.Optional(UiTabBadgeSchema),
+});
+
+export const UiComponentInfoSchema = Type.Object({
+  packageId: NonEmptyString,
+  tag: NonEmptyString,
+  module: Type.String(),
+  scope: Type.Union([
+    Type.Literal("tab"),
+    Type.Literal("widget"),
+    Type.Literal("settings"),
+    Type.Literal("global"),
+  ]),
+});
+
+export const UiSettingsInfoSchema = Type.Object({
+  packageId: NonEmptyString,
+  id: NonEmptyString,
+  title: Type.String(),
+  render: Type.Union([
+    Type.Object({ type: Type.Literal("iframe"), src: Type.String() }),
+    Type.Object({ type: Type.Literal("component"), tag: Type.String() }),
+  ]),
+});
+
+export const AppsGetUiManifestResultSchema = Type.Object(
+  {
+    tabs: Type.Array(UiTabInfoSchema),
+    components: Type.Array(UiComponentInfoSchema),
+    settings: Type.Array(UiSettingsInfoSchema),
+  },
+  { additionalProperties: false },
+);
+
+// =============================================================================
+// apps.start / apps.stop / apps.restart
+// =============================================================================
+
+export const AppsLifecycleParamsSchema = Type.Object(
+  {
+    packageId: NonEmptyString,
+  },
+  { additionalProperties: false },
+);
+
+export const AppsLifecycleResultSchema = Type.Object(
+  {
+    ok: Type.Boolean(),
+    error: Type.Optional(Type.String()),
+  },
+  { additionalProperties: false },
+);
+
+// =============================================================================
 // Type Exports
 // =============================================================================
 
 export type PackageInfo = Static<typeof PackageInfoSchema>;
+export type PackageCapabilities = Static<typeof PackageCapabilitiesSchema>;
 export type AppsListParams = Static<typeof AppsListParamsSchema>;
 export type AppsListResult = Static<typeof AppsListResultSchema>;
 export type AppsInfoParams = Static<typeof AppsInfoParamsSchema>;
@@ -263,3 +409,9 @@ export type AppsSetEnabledParams = Static<typeof AppsSetEnabledParamsSchema>;
 export type AppsSetEnabledResult = Static<typeof AppsSetEnabledResultSchema>;
 export type AppsStatusParams = Static<typeof AppsStatusParamsSchema>;
 export type AppsStatusResult = Static<typeof AppsStatusResultSchema>;
+export type UiTabInfo = Static<typeof UiTabInfoSchema>;
+export type UiComponentInfo = Static<typeof UiComponentInfoSchema>;
+export type UiSettingsInfo = Static<typeof UiSettingsInfoSchema>;
+export type AppsGetUiManifestResult = Static<typeof AppsGetUiManifestResultSchema>;
+export type AppsLifecycleParams = Static<typeof AppsLifecycleParamsSchema>;
+export type AppsLifecycleResult = Static<typeof AppsLifecycleResultSchema>;

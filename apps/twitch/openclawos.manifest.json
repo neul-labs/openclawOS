@@ -1,0 +1,78 @@
+{
+  "id": "@openclawos/twitch",
+  "name": "Twitch Channel",
+  "version": "0.1.0",
+  "description": "Twitch chat integration",
+  "type": "app",
+  "main": "dist/index.js",
+  "protocol": {
+    "version": "1.0"
+  },
+  "capabilities": {
+    "channels": {
+      "provides": ["twitch"]
+    },
+    "hooks": {
+      "subscribes": ["message_sending"]
+    },
+    "resources": {
+      "env": ["TWITCH_CLIENT_SECRET", "TWITCH_ACCESS_TOKEN", "TWITCH_REFRESH_TOKEN"],
+      "network": {
+        "hosts": ["*"]
+      }
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "clientId": {
+        "type": "string",
+        "description": "Twitch application client ID"
+      },
+      "clientSecret": {
+        "type": "string",
+        "description": "Twitch application client secret"
+      },
+      "accessToken": {
+        "type": "string",
+        "description": "OAuth access token for authentication"
+      },
+      "refreshToken": {
+        "type": "string",
+        "description": "OAuth refresh token"
+      },
+      "channels": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "Twitch channels to join on connect"
+      }
+    },
+    "required": ["clientId"]
+  },
+  "configUiHints": {
+    "clientId": {
+      "label": "Client ID",
+      "description": "Your Twitch application client ID"
+    },
+    "clientSecret": {
+      "label": "Client Secret",
+      "sensitive": true,
+      "description": "Your Twitch application client secret"
+    },
+    "accessToken": {
+      "label": "Access Token",
+      "sensitive": true,
+      "description": "OAuth access token for bot authentication"
+    },
+    "refreshToken": {
+      "label": "Refresh Token",
+      "sensitive": true,
+      "description": "OAuth refresh token for token renewal"
+    },
+    "channels": {
+      "label": "Auto-join Channels",
+      "description": "Twitch channels to join automatically (e.g., mychannel)",
+      "advanced": true
+    }
+  }
+}

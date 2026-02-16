@@ -1,0 +1,28 @@
+{
+  "id": "@openclawos/imessage",
+  "name": "iMessage Channel",
+  "version": "0.1.0",
+  "description": "iMessage chat integration (macOS only)",
+  "type": "app",
+  "main": "dist/index.js",
+  "protocol": {
+    "version": "1.0"
+  },
+  "capabilities": {
+    "channels": {
+      "provides": ["imessage"]
+    },
+    "hooks": {
+      "subscribes": ["message_sending"]
+    },
+    "resources": {
+      "env": []
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "properties": {},
+    "required": []
+  },
+  "configUiHints": {}
+}

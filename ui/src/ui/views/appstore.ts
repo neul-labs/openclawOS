@@ -12,6 +12,7 @@ import type {
   PackageType,
 } from "../controllers/appstore.ts";
 import { clampText } from "../format.ts";
+import { renderInstallModal } from "./appstore-install-modal.ts";
 
 export type AppStoreProps = {
   loading: boolean;
@@ -22,12 +23,18 @@ export type AppStoreProps = {
   selectedId: string | null;
   busyKey: string | null;
   messages: AppStoreMessageMap;
+  installPending: PackageInfo | null;
   onFilterChange: (next: string) => void;
   onCategoryChange: (next: PackageCategory) => void;
   onSelect: (packageId: string | null) => void;
-  onInstall: (packageId: string) => void;
+  onShowInstallModal: (packageId: string) => void;
+  onConfirmInstall: () => void;
+  onCancelInstall: () => void;
   onUninstall: (packageId: string) => void;
   onToggleEnabled: (packageId: string, enabled: boolean) => void;
+  onStart: (packageId: string) => void;
+  onStop: (packageId: string) => void;
+  onRestart: (packageId: string) => void;
   onRefresh: () => void;
 };
 
@@ -94,6 +101,16 @@ export function renderAppStore(props: AppStoreProps) {
   const groups = groupPackages(filtered);
 
   return html`
+    ${
+      props.installPending
+        ? renderInstallModal({
+            package: props.installPending,
+            onConfirm: props.onConfirmInstall,
+            onCancel: props.onCancelInstall,
+          })
+        : nothing
+    }
+
     <section class="card">
       <div class="row" style="justify-content: space-between;">
         <div>
@@ -303,6 +320,59 @@ function renderPackageActions(pkg: PackageInfo, busy: boolean, props: AppStorePr
   const actions: ReturnType<typeof html>[] = [];
 
   if (pkg.installed) {
+    // Lifecycle controls for apps only
+    if (pkg.type === "app" && pkg.enabled !== false) {
+      const status = pkg.status;
+
+      // Start button: show when stopped or error
+      if (status === "stopped" || status === "error") {
+        actions.push(html`
+          <button
+            class="btn success"
+            ?disabled=${busy}
+            @click=${(e: Event) => {
+              e.stopPropagation();
+              props.onStart(pkg.id);
+            }}
+          >
+            ${busy ? "..." : "Start"}
+          </button>
+        `);
+      }
+
+      // Stop button: show when running
+      if (status === "running") {
+        actions.push(html`
+          <button
+            class="btn"
+            ?disabled=${busy}
+            @click=${(e: Event) => {
+              e.stopPropagation();
+              props.onStop(pkg.id);
+            }}
+          >
+            ${busy ? "..." : "Stop"}
+          </button>
+        `);
+      }
+
+      // Restart button: show when running
+      if (status === "running") {
+        actions.push(html`
+          <button
+            class="btn warning"
+            ?disabled=${busy}
+            @click=${(e: Event) => {
+              e.stopPropagation();
+              props.onRestart(pkg.id);
+            }}
+          >
+            ${busy ? "..." : "Restart"}
+          </button>
+        `);
+      }
+    }
+
     // Toggle enabled/disabled
     if (pkg.enabled !== false) {
       actions.push(html`
@@ -348,14 +418,14 @@ function renderPackageActions(pkg: PackageInfo, busy: boolean, props: AppStorePr
       `);
     }
   } else {
-    // Install
+    // Install (shows confirmation modal first)
     actions.push(html`
       <button
         class="btn primary"
         ?disabled=${busy}
         @click=${(e: Event) => {
           e.stopPropagation();
-          props.onInstall(pkg.id);
+          props.onShowInstallModal(pkg.id);
         }}
       >
         ${busy ? "Installing..." : "Install"}

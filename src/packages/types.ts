@@ -111,6 +111,11 @@ export interface PackageInfo {
   status?: PackageStatus;
   /** Last error message */
   lastError?: string;
+
+  // === Capabilities (for install modal) ===
+
+  /** Package capabilities */
+  capabilities?: Record<string, unknown>;
 }
 
 /**
@@ -345,4 +350,13 @@ export interface PackageRegistry {
 
   /** Get package runtime status (for apps) */
   getStatus(packageId: string): Promise<PackageStatus>;
+
+  /** Start an app package */
+  startPackage(packageId: string): Promise<void>;
+
+  /** Stop an app package */
+  stopPackage(packageId: string): Promise<void>;
+
+  /** Restart an app package */
+  restartPackage(packageId: string): Promise<void>;
 }

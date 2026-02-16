@@ -1,0 +1,89 @@
+{
+  "id": "@openclawos/matrix",
+  "name": "Matrix Channel",
+  "version": "0.1.0",
+  "description": "Matrix chat integration",
+  "type": "app",
+  "main": "dist/index.js",
+  "protocol": {
+    "version": "1.0"
+  },
+  "capabilities": {
+    "channels": {
+      "provides": ["matrix"]
+    },
+    "hooks": {
+      "subscribes": ["message_sending"]
+    },
+    "resources": {
+      "env": ["MATRIX_ACCESS_TOKEN", "MATRIX_PASSWORD"],
+      "network": {
+        "hosts": ["*"]
+      }
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "homeserver": {
+        "type": "string",
+        "description": "Matrix homeserver URL (e.g., https://matrix.org)"
+      },
+      "userId": {
+        "type": "string",
+        "description": "Full Matrix user ID (e.g., @user:matrix.org)"
+      },
+      "accessToken": {
+        "type": "string",
+        "description": "Matrix access token for authentication"
+      },
+      "password": {
+        "type": "string",
+        "description": "Password for password-based authentication"
+      },
+      "deviceName": {
+        "type": "string",
+        "description": "Device name for this session",
+        "default": "OpenClawOS"
+      },
+      "initialSyncLimit": {
+        "type": "integer",
+        "description": "Number of recent messages to sync initially",
+        "default": 20
+      }
+    },
+    "required": ["homeserver"]
+  },
+  "configUiHints": {
+    "homeserver": {
+      "label": "Homeserver URL",
+      "description": "Matrix homeserver URL (e.g., https://matrix.org)"
+    },
+    "userId": {
+      "label": "User ID",
+      "description": "Full Matrix user ID (e.g., @user:matrix.org)"
+    },
+    "accessToken": {
+      "label": "Access Token",
+      "sensitive": true,
+      "description": "Matrix access token (preferred authentication method)",
+      "advanced": true
+    },
+    "password": {
+      "label": "Password",
+      "sensitive": true,
+      "description": "Password for authentication (alternative to access token)",
+      "advanced": true
+    },
+    "deviceName": {
+      "label": "Device Name",
+      "description": "Name for this device session",
+      "advanced": true
+    },
+    "initialSyncLimit": {
+      "label": "Initial Sync Limit",
+      "description": "Number of recent messages to load on startup",
+      "advanced": true
+    }
+  }
+}

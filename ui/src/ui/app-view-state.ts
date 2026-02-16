@@ -205,6 +205,7 @@ export type AppViewState = {
   appstoreSelectedId: string | null;
   appstoreBusyKey: string | null;
   appstoreMessages: import("./controllers/appstore.ts").AppStoreMessageMap;
+  appstoreInstallPending: import("./controllers/appstore.ts").PackageInfo | null;
   debugLoading: boolean;
   debugStatus: StatusSummary | null;
   debugHealth: HealthSnapshot | null;

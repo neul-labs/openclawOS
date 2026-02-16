@@ -6,6 +6,7 @@
   "devDependencies": {
     "openclaw": "workspace:*"
   },
+  "deprecated": "This extension is deprecated. Use @openclawos/app-bluebubbles instead (apps/bluebubbles)",
   "openclaw": {
     "extensions": [
       "./index.ts"

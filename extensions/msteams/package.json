@@ -12,6 +12,7 @@
   "devDependencies": {
     "openclaw": "workspace:*"
   },
+  "deprecated": "This extension is deprecated. Use @openclawos/app-msteams instead.",
   "openclaw": {
     "extensions": [
       "./index.ts"

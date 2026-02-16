@@ -1,0 +1,60 @@
+{
+  "id": "@openclawos/line",
+  "name": "LINE Channel",
+  "version": "0.1.0",
+  "description": "LINE Messaging API integration",
+  "type": "app",
+  "main": "dist/index.js",
+  "protocol": {
+    "version": "1.0"
+  },
+  "capabilities": {
+    "channels": {
+      "provides": ["line"]
+    },
+    "hooks": {
+      "subscribes": ["message_sending"]
+    },
+    "resources": {
+      "env": ["LINE_CHANNEL_ACCESS_TOKEN", "LINE_CHANNEL_SECRET"],
+      "network": {
+        "hosts": ["*"]
+      }
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "channelAccessToken": {
+        "type": "string",
+        "description": "LINE Channel Access Token"
+      },
+      "channelSecret": {
+        "type": "string",
+        "description": "LINE Channel Secret"
+      },
+      "webhookUrl": {
+        "type": "string",
+        "description": "Webhook URL for LINE to send events to"
+      }
+    },
+    "required": ["channelAccessToken", "channelSecret"]
+  },
+  "configUiHints": {
+    "channelAccessToken": {
+      "label": "Channel Access Token",
+      "description": "Long-lived channel access token from LINE Developers Console",
+      "sensitive": true
+    },
+    "channelSecret": {
+      "label": "Channel Secret",
+      "description": "Channel secret for webhook signature validation",
+      "sensitive": true
+    },
+    "webhookUrl": {
+      "label": "Webhook URL",
+      "description": "Public URL where LINE can send webhook events",
+      "advanced": true
+    }
+  }
+}

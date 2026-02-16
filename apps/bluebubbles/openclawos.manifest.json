@@ -1,0 +1,50 @@
+{
+  "id": "@openclawos/bluebubbles",
+  "name": "BlueBubbles Channel",
+  "version": "0.1.0",
+  "description": "BlueBubbles iMessage integration",
+  "type": "app",
+  "main": "dist/index.js",
+  "protocol": {
+    "version": "1.0"
+  },
+  "capabilities": {
+    "channels": {
+      "provides": ["bluebubbles"]
+    },
+    "hooks": {
+      "subscribes": ["message_sending"]
+    },
+    "resources": {
+      "env": ["BLUEBUBBLES_PASSWORD"],
+      "network": {
+        "hosts": ["*"]
+      }
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "serverUrl": {
+        "type": "string",
+        "description": "BlueBubbles server URL"
+      },
+      "password": {
+        "type": "string",
+        "description": "BlueBubbles server password"
+      }
+    },
+    "required": ["serverUrl", "password"]
+  },
+  "configUiHints": {
+    "serverUrl": {
+      "label": "Server URL",
+      "description": "BlueBubbles server URL (e.g., http://localhost:1234)"
+    },
+    "password": {
+      "label": "Server Password",
+      "sensitive": true,
+      "description": "Password to authenticate with BlueBubbles server"
+    }
+  }
+}

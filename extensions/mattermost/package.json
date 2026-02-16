@@ -2,11 +2,12 @@
   "name": "@openclaw/mattermost",
   "version": "2026.2.15",
   "private": true,
-  "description": "OpenClaw Mattermost channel plugin",
+  "description": "OpenClaw Mattermost channel plugin (DEPRECATED)",
   "type": "module",
   "devDependencies": {
     "openclaw": "workspace:*"
   },
+  "deprecated": "This package has been superseded by @openclawos/app-mattermost. Please use the new app-based implementation in /apps/mattermost/",
   "openclaw": {
     "extensions": [
       "./index.ts"

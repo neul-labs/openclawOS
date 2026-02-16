@@ -9,6 +9,7 @@
   "devDependencies": {
     "openclaw": "workspace:*"
   },
+  "deprecated": "This package is deprecated. Use @openclawos/app-zalo instead.",
   "openclaw": {
     "extensions": [
       "./index.ts"

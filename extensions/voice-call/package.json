@@ -1,7 +1,7 @@
 {
   "name": "@openclaw/voice-call",
   "version": "2026.2.15",
-  "description": "OpenClaw voice-call plugin",
+  "description": "OpenClaw voice-call plugin (DEPRECATED - Use @openclawos/app-voice-call instead)",
   "type": "module",
   "dependencies": {
     "@sinclair/typebox": "0.34.48",
@@ -11,6 +11,7 @@
   "devDependencies": {
     "openclaw": "workspace:*"
   },
+  "deprecated": "This extension is deprecated. Please use @openclawos/app-voice-call app instead.",
   "openclaw": {
     "extensions": [
       "./index.ts"

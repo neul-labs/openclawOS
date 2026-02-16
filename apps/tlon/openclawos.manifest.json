@@ -1,0 +1,49 @@
+{
+  "id": "@openclawos/tlon",
+  "name": "Tlon Channel",
+  "version": "0.1.0",
+  "description": "Tlon (Urbit) chat integration",
+  "type": "app",
+  "main": "dist/index.js",
+  "protocol": {
+    "version": "1.0"
+  },
+  "capabilities": {
+    "channels": {
+      "provides": ["tlon"]
+    },
+    "hooks": {
+      "subscribes": ["message_sending"]
+    },
+    "resources": {
+      "network": {
+        "hosts": ["*"]
+      }
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "shipUrl": {
+        "type": "string",
+        "description": "Urbit ship URL (e.g., http://localhost:8080)"
+      },
+      "code": {
+        "type": "string",
+        "description": "Urbit authentication code"
+      }
+    },
+    "required": ["shipUrl", "code"]
+  },
+  "configUiHints": {
+    "shipUrl": {
+      "label": "Ship URL",
+      "description": "URL of your Urbit ship (e.g., http://localhost:8080)"
+    },
+    "code": {
+      "label": "Authentication Code",
+      "sensitive": true,
+      "description": "Urbit +code for authentication"
+    }
+  }
+}

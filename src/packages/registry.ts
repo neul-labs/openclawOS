@@ -213,6 +213,7 @@ export function createPackageRegistry(options: RegistryOptions): PackageRegistry
       installedVersion: manifest.version,
       latestVersion: manifest.version, // Currently same as installed; remote registry not implemented
       status,
+      capabilities: manifest.capabilities,
     };
   }
 
@@ -597,6 +598,63 @@ export function createPackageRegistry(options: RegistryOptions): PackageRegistry
       // Fallback: check enabled config
       const enabled = await isPackageEnabled(packageId);
       return enabled ? "running" : "stopped";
+    },
+
+    async startPackage(packageId: string): Promise<void> {
+      if (!supervisor) {
+        throw new Error("Supervisor not available for lifecycle control");
+      }
+
+      const manifest = await this.getManifest(packageId);
+      if (!manifest) {
+        throw new Error(`Package ${packageId} not found`);
+      }
+
+      if (manifest.type !== "app") {
+        throw new Error(`Package ${packageId} is not an app`);
+      }
+
+      await supervisor.spawn(manifest);
+    },
+
+    async stopPackage(packageId: string): Promise<void> {
+      if (!supervisor) {
+        throw new Error("Supervisor not available for lifecycle control");
+      }
+
+      const manifest = await this.getManifest(packageId);
+      if (!manifest) {
+        throw new Error(`Package ${packageId} not found`);
+      }
+
+      if (manifest.type !== "app") {
+        throw new Error(`Package ${packageId} is not an app`);
+      }
+
+      await supervisor.stop(packageId);
+    },
+
+    async restartPackage(packageId: string): Promise<void> {
+      if (!supervisor) {
+        throw new Error("Supervisor not available for lifecycle control");
+      }
+
+      const manifest = await this.getManifest(packageId);
+      if (!manifest) {
+        throw new Error(`Package ${packageId} not found`);
+      }
+
+      if (manifest.type !== "app") {
+        throw new Error(`Package ${packageId} is not an app`);
+      }
+
+      // Stop first, then spawn
+      try {
+        await supervisor.stop(packageId);
+      } catch {
+        // Ignore errors stopping app
+      }
+      await supervisor.spawn(manifest);
     },
   };
 }

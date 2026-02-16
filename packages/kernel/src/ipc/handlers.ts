@@ -171,6 +171,77 @@ function handleAppShutdown(deps: HandlerDependencies): IPCMethodHandler {
 // Capability Handlers
 // =============================================================================
 
+/**
+ * Validate that a capability registration matches the manifest declaration.
+ * Returns null if valid, or an error message if invalid.
+ */
+function validateCapabilityAgainstManifest(
+  type: string,
+  config: unknown,
+  manifest: { capabilities?: Record<string, unknown> },
+): string | null {
+  const caps = manifest.capabilities || {};
+  const cfg = config as Record<string, unknown>;
+
+  switch (type) {
+    case "channel": {
+      const channelId = cfg?.channelId;
+      const provides = (caps.channels as Record<string, unknown>)?.provides;
+      if (!Array.isArray(provides) || !provides.includes(channelId)) {
+        return `Channel "${channelId}" not declared in manifest capabilities.channels.provides`;
+      }
+      break;
+    }
+    case "tool": {
+      const toolId = cfg?.toolId;
+      const provides = (caps.tools as Record<string, unknown>)?.provides;
+      if (!Array.isArray(provides) || !provides.includes(toolId)) {
+        return `Tool "${toolId}" not declared in manifest capabilities.tools.provides`;
+      }
+      break;
+    }
+    case "hook": {
+      const event = cfg?.event;
+      const subscribes = (caps.hooks as Record<string, unknown>)?.subscribes || [];
+      const intercepts = (caps.hooks as Record<string, unknown>)?.intercepts || [];
+      const allowed = [
+        ...(Array.isArray(subscribes) ? subscribes : []),
+        ...(Array.isArray(intercepts) ? intercepts : []),
+      ];
+      if (!allowed.includes(event)) {
+        return `Hook "${event}" not declared in manifest capabilities.hooks`;
+      }
+      break;
+    }
+    case "gateway_method": {
+      const methodName = cfg?.methodName;
+      const methods = (caps.gateway as Record<string, unknown>)?.methods;
+      if (!Array.isArray(methods) || !methods.includes(methodName)) {
+        return `Gateway method "${methodName}" not declared in manifest capabilities.gateway.methods`;
+      }
+      break;
+    }
+    case "http_route": {
+      const route = cfg?.route;
+      const routes = (caps.gateway as Record<string, unknown>)?.httpRoutes;
+      if (!Array.isArray(routes) || !routes.includes(route)) {
+        return `HTTP route "${route}" not declared in manifest capabilities.gateway.httpRoutes`;
+      }
+      break;
+    }
+    case "provider": {
+      const providerId = cfg?.providerId;
+      const provides = (caps.providers as Record<string, unknown>)?.provides;
+      if (!Array.isArray(provides) || !provides.includes(providerId)) {
+        return `Provider "${providerId}" not declared in manifest capabilities.providers.provides`;
+      }
+      break;
+    }
+  }
+
+  return null;
+}
+
 function handleCapabilityRegister(deps: HandlerDependencies): IPCMethodHandler {
   return async (appId, params): Promise<CapabilityRegisterResult> => {
     if (!appId) {
@@ -196,6 +267,26 @@ function handleCapabilityRegister(deps: HandlerDependencies): IPCMethodHandler {
         capabilityId: "",
         granted: false,
         reason: "App not registered",
+      };
+    }
+
+    // Validate capability against manifest declaration
+    const validationError = validateCapabilityAgainstManifest(type, config, manifest);
+    if (validationError) {
+      return {
+        capabilityId: "",
+        granted: false,
+        reason: validationError,
+      };
+    }
+
+    // Check for conflicts before registering
+    const conflictError = deps.capabilities.checkConflict(type, config);
+    if (conflictError) {
+      return {
+        capabilityId: "",
+        granted: false,
+        reason: conflictError,
       };
     }
 

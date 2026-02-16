@@ -1,7 +1,8 @@
 {
   "name": "@openclaw/matrix",
   "version": "2026.2.15",
-  "description": "OpenClaw Matrix channel plugin",
+  "private": true,
+  "description": "DEPRECATED: OpenClaw Matrix channel plugin",
   "type": "module",
   "dependencies": {
     "@matrix-org/matrix-sdk-crypto-nodejs": "^0.4.0",
@@ -13,6 +14,7 @@
   "devDependencies": {
     "openclaw": "workspace:*"
   },
+  "deprecated": "Use @openclawos/matrix app instead",
   "openclaw": {
     "extensions": [
       "./index.ts"

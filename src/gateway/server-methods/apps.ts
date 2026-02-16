@@ -366,4 +366,177 @@ export const appsHandlers: GatewayRequestHandlers = {
       );
     }
   },
+
+  /**
+   * Get UI manifest for all enabled packages.
+   */
+  "apps.getUiManifest": async ({ respond }) => {
+    try {
+      const registry = getRegistry();
+      const packages = await registry.listAvailable({ enabled: true });
+
+      const tabs: Array<{
+        packageId: string;
+        id: string;
+        title: string;
+        icon?: string;
+        render: { type: string; src?: string; tag?: string; view?: string };
+        position?: string;
+        badge?: { method: string; interval?: number };
+      }> = [];
+
+      const components: Array<{
+        packageId: string;
+        tag: string;
+        module: string;
+        scope: string;
+      }> = [];
+
+      const settings: Array<{
+        packageId: string;
+        id: string;
+        title: string;
+        render: { type: string; src?: string; tag?: string };
+      }> = [];
+
+      for (const pkg of packages) {
+        const caps = pkg.capabilities;
+        const ui = caps?.ui as
+          | {
+              tabs?: Array<{
+                id: string;
+                title: string;
+                icon?: string;
+                render: { type: string; src?: string; tag?: string; view?: string };
+                position?: string;
+                badge?: { method: string; interval?: number };
+              }>;
+              components?: Array<{
+                tag: string;
+                module: string;
+                scope: string;
+              }>;
+              settings?: Array<{
+                id: string;
+                title: string;
+                render: { type: string; src?: string; tag?: string };
+              }>;
+            }
+          | undefined;
+
+        if (ui?.tabs) {
+          for (const tab of ui.tabs) {
+            tabs.push({
+              packageId: pkg.id,
+              id: tab.id,
+              title: tab.title,
+              icon: tab.icon,
+              render: tab.render,
+              position: tab.position,
+              badge: tab.badge,
+            });
+          }
+        }
+
+        if (ui?.components) {
+          for (const component of ui.components) {
+            components.push({
+              packageId: pkg.id,
+              tag: component.tag,
+              module: component.module,
+              scope: component.scope,
+            });
+          }
+        }
+
+        if (ui?.settings) {
+          for (const setting of ui.settings) {
+            settings.push({
+              packageId: pkg.id,
+              id: setting.id,
+              title: setting.title,
+              render: setting.render,
+            });
+          }
+        }
+      }
+
+      respond(true, { tabs, components, settings });
+    } catch (error) {
+      respond(
+        false,
+        undefined,
+        errorShape(ErrorCodes.UNAVAILABLE, `Failed to get UI manifest: ${String(error)}`),
+      );
+    }
+  },
+
+  /**
+   * Start a package (app).
+   */
+  "apps.start": async ({ params, respond }) => {
+    const p = params as { packageId?: string };
+    if (!p.packageId?.trim()) {
+      respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, "packageId is required"));
+      return;
+    }
+
+    try {
+      const registry = getRegistry();
+      await registry.startPackage(p.packageId);
+      respond(true, { ok: true });
+    } catch (error) {
+      respond(
+        false,
+        undefined,
+        errorShape(ErrorCodes.UNAVAILABLE, `Failed to start package: ${String(error)}`),
+      );
+    }
+  },
+
+  /**
+   * Stop a package (app).
+   */
+  "apps.stop": async ({ params, respond }) => {
+    const p = params as { packageId?: string };
+    if (!p.packageId?.trim()) {
+      respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, "packageId is required"));
+      return;
+    }
+
+    try {
+      const registry = getRegistry();
+      await registry.stopPackage(p.packageId);
+      respond(true, { ok: true });
+    } catch (error) {
+      respond(
+        false,
+        undefined,
+        errorShape(ErrorCodes.UNAVAILABLE, `Failed to stop package: ${String(error)}`),
+      );
+    }
+  },
+
+  /**
+   * Restart a package (app).
+   */
+  "apps.restart": async ({ params, respond }) => {
+    const p = params as { packageId?: string };
+    if (!p.packageId?.trim()) {
+      respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, "packageId is required"));
+      return;
+    }
+
+    try {
+      const registry = getRegistry();
+      await registry.restartPackage(p.packageId);
+      respond(true, { ok: true });
+    } catch (error) {
+      respond(
+        false,
+        undefined,
+        errorShape(ErrorCodes.UNAVAILABLE, `Failed to restart package: ${String(error)}`),
+      );
+    }
+  },
 };

@@ -1,0 +1,49 @@
+{
+  "id": "@openclawos/zalouser",
+  "name": "Zalo User Channel",
+  "version": "0.1.0",
+  "description": "Zalo User chat integration",
+  "type": "app",
+  "main": "dist/index.js",
+  "protocol": {
+    "version": "1.0"
+  },
+  "capabilities": {
+    "channels": {
+      "provides": ["zalouser"]
+    },
+    "hooks": {
+      "subscribes": ["message_sending"]
+    },
+    "resources": {
+      "network": {
+        "hosts": ["*"]
+      }
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "imei": {
+        "type": "string",
+        "description": "Device IMEI for Zalo authentication"
+      },
+      "cookies": {
+        "type": "string",
+        "description": "Authentication cookies"
+      }
+    },
+    "required": ["imei"]
+  },
+  "configUiHints": {
+    "imei": {
+      "label": "IMEI",
+      "description": "Device IMEI for Zalo authentication"
+    },
+    "cookies": {
+      "label": "Cookies",
+      "sensitive": true,
+      "description": "Authentication cookies for Zalo"
+    }
+  }
+}

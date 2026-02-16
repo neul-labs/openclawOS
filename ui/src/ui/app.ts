@@ -306,6 +306,7 @@ export class OpenClawApp extends LitElement {
   @state() appstoreSelectedId: string | null = null;
   @state() appstoreBusyKey: string | null = null;
   @state() appstoreMessages: import("./controllers/appstore.ts").AppStoreMessageMap = {};
+  @state() appstoreInstallPending: import("./controllers/appstore.ts").PackageInfo | null = null;
 
   @state() debugLoading = false;
   @state() debugStatus: StatusSummary | null = null;

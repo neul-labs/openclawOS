@@ -1,0 +1,54 @@
+{
+  "id": "@openclawos/voice-call",
+  "name": "Voice Call",
+  "version": "0.1.0",
+  "description": "Voice call handling via Twilio",
+  "type": "app",
+  "main": "dist/index.js",
+  "protocol": {
+    "version": "1.0"
+  },
+  "capabilities": {
+    "tools": {
+      "provides": ["voice_call", "voice_hangup", "voice_transfer"]
+    },
+    "resources": {
+      "network": {
+        "hosts": ["api.twilio.com", "*.twilio.com"]
+      }
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "twilioAccountSid": {
+        "type": "string",
+        "description": "Twilio Account SID"
+      },
+      "twilioAuthToken": {
+        "type": "string",
+        "description": "Twilio Auth Token"
+      },
+      "twilioPhoneNumber": {
+        "type": "string",
+        "description": "Twilio Phone Number (E.164 format)"
+      }
+    },
+    "required": ["twilioAccountSid", "twilioAuthToken"]
+  },
+  "configUiHints": {
+    "twilioAccountSid": {
+      "label": "Twilio Account SID",
+      "description": "Your Twilio Account SID from the Twilio Console"
+    },
+    "twilioAuthToken": {
+      "label": "Twilio Auth Token",
+      "sensitive": true,
+      "description": "Your Twilio Auth Token from the Twilio Console"
+    },
+    "twilioPhoneNumber": {
+      "label": "Twilio Phone Number",
+      "description": "Your Twilio phone number in E.164 format (e.g., +1234567890)"
+    }
+  }
+}

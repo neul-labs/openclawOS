@@ -1,0 +1,69 @@
+{
+  "id": "@openclawos/feishu",
+  "name": "Feishu Channel",
+  "version": "0.1.0",
+  "description": "Feishu (Lark) chat integration",
+  "type": "app",
+  "main": "dist/index.js",
+  "protocol": {
+    "version": "1.0"
+  },
+  "capabilities": {
+    "channels": {
+      "provides": ["feishu"]
+    },
+    "hooks": {
+      "subscribes": ["message_sending"]
+    },
+    "resources": {
+      "network": {
+        "hosts": ["*"]
+      }
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "appId": {
+        "type": "string",
+        "description": "Feishu App ID"
+      },
+      "appSecret": {
+        "type": "string",
+        "description": "Feishu App Secret"
+      },
+      "encryptKey": {
+        "type": "string",
+        "description": "Feishu Encrypt Key (optional)"
+      },
+      "verificationToken": {
+        "type": "string",
+        "description": "Feishu Verification Token (optional)"
+      }
+    },
+    "required": ["appId", "appSecret"]
+  },
+  "configUiHints": {
+    "appId": {
+      "label": "App ID",
+      "description": "Your Feishu application ID"
+    },
+    "appSecret": {
+      "label": "App Secret",
+      "sensitive": true,
+      "description": "Your Feishu application secret"
+    },
+    "encryptKey": {
+      "label": "Encrypt Key",
+      "sensitive": true,
+      "description": "Optional encryption key for secure event callbacks",
+      "advanced": true
+    },
+    "verificationToken": {
+      "label": "Verification Token",
+      "sensitive": true,
+      "description": "Optional verification token for event callbacks",
+      "advanced": true
+    }
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "id": "@openclawos/msteams",
+  "name": "Microsoft Teams Channel",
+  "version": "0.1.0",
+  "description": "Microsoft Teams chat integration",
+  "type": "app",
+  "main": "dist/index.js",
+  "protocol": {
+    "version": "1.0"
+  },
+  "capabilities": {
+    "channels": {
+      "provides": ["msteams"]
+    },
+    "hooks": {
+      "subscribes": ["message_sending"]
+    },
+    "resources": {
+      "env": ["MSTEAMS_APP_PASSWORD"],
+      "network": {
+        "hosts": ["*"]
+      }
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "appId": {
+        "type": "string",
+        "description": "Microsoft Teams App ID"
+      },
+      "appPassword": {
+        "type": "string",
+        "description": "Microsoft Teams App Password"
+      },
+      "tenantId": {
+        "type": "string",
+        "description": "Microsoft Teams Tenant ID (optional)"
+      }
+    },
+    "required": ["appId", "appPassword"]
+  },
+  "configUiHints": {
+    "appId": {
+      "label": "App ID",
+      "description": "Microsoft Teams Bot Application ID"
+    },
+    "appPassword": {
+      "label": "App Password",
+      "sensitive": true,
+      "description": "Microsoft Teams Bot Application Password"
+    },
+    "tenantId": {
+      "label": "Tenant ID",
+      "description": "Microsoft Teams Tenant ID (optional)",
+      "advanced": true
+    }
+  }
+}

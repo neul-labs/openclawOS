@@ -2,11 +2,12 @@
   "name": "@openclaw/open-prose",
   "version": "2026.2.15",
   "private": true,
-  "description": "OpenProse VM skill pack plugin (slash command + telemetry).",
+  "description": "DEPRECATED: OpenProse VM skill pack plugin (slash command + telemetry). Replaced by @openclawos/app-open-prose.",
   "type": "module",
   "devDependencies": {
     "openclaw": "workspace:*"
   },
+  "deprecated": "This extension is deprecated. Use @openclawos/app-open-prose instead.",
   "openclaw": {
     "extensions": [
       "./index.ts"

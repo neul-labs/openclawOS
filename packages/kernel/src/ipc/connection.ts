@@ -28,6 +28,15 @@ export interface IPCConnectionEvents {
   message: [message: IPCMessage];
 }
 
+/** Maximum buffer size to prevent DoS (1MB) */
+const MAX_BUFFER_SIZE = 1024 * 1024;
+
+/** Maximum single message size (256KB) */
+const MAX_MESSAGE_SIZE = 256 * 1024;
+
+/** Methods that don't require authentication */
+const UNAUTHENTICATED_METHODS = new Set(["app.register"]);
+
 export class IPCConnection extends EventEmitter<IPCConnectionEvents> {
   private buffer = "";
   private _appId: string | null = null;
@@ -123,7 +132,16 @@ export class IPCConnection extends EventEmitter<IPCConnectionEvents> {
   }
 
   private handleData(data: Buffer): void {
-    this.buffer += data.toString("utf8");
+    const newData = data.toString("utf8");
+
+    // Check buffer size limit to prevent DoS
+    if (this.buffer.length + newData.length > MAX_BUFFER_SIZE) {
+      this.sendError("", "INVALID_REQUEST", "Message too large - buffer limit exceeded");
+      this.close();
+      return;
+    }
+
+    this.buffer += newData;
 
     let idx: number;
     while ((idx = this.buffer.indexOf("\n")) !== -1) {
@@ -131,6 +149,12 @@ export class IPCConnection extends EventEmitter<IPCConnectionEvents> {
       this.buffer = this.buffer.slice(idx + 1);
 
       if (!line) {
+        continue;
+      }
+
+      // Check individual message size
+      if (line.length > MAX_MESSAGE_SIZE) {
+        this.sendError("", "INVALID_REQUEST", "Message too large");
         continue;
       }
 
@@ -150,6 +174,22 @@ export class IPCConnection extends EventEmitter<IPCConnectionEvents> {
     }
 
     const request = message;
+
+    // Token validation: require token for all methods except unauthenticated ones
+    if (!UNAUTHENTICATED_METHODS.has(request.method)) {
+      // If app is registered, validate the token
+      if (this._token) {
+        if (!request.token || request.token !== this._token) {
+          this.sendError(request.id, "UNAUTHORIZED", "Invalid or missing authentication token");
+          return;
+        }
+      } else {
+        // App not registered yet - reject non-registration requests
+        this.sendError(request.id, "APP_NOT_REGISTERED", "Must call app.register first");
+        return;
+      }
+    }
+
     const handler = this.handlers.get(request.method);
 
     if (!handler) {

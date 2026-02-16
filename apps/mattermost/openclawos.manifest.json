@@ -1,0 +1,79 @@
+{
+  "id": "@openclawos/mattermost",
+  "name": "Mattermost Channel",
+  "version": "0.1.0",
+  "description": "Mattermost chat integration",
+  "type": "app",
+  "main": "dist/index.js",
+  "protocol": {
+    "version": "1.0"
+  },
+  "capabilities": {
+    "channels": {
+      "provides": ["mattermost"]
+    },
+    "hooks": {
+      "subscribes": ["message_sending"]
+    },
+    "resources": {
+      "env": ["MATTERMOST_BOT_TOKEN", "MATTERMOST_PERSONAL_ACCESS_TOKEN", "MATTERMOST_PASSWORD"],
+      "network": {
+        "hosts": ["*"]
+      }
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "serverUrl": {
+        "type": "string",
+        "description": "Mattermost server URL (e.g., https://mattermost.example.com)"
+      },
+      "botToken": {
+        "type": "string",
+        "description": "Bot account token"
+      },
+      "personalAccessToken": {
+        "type": "string",
+        "description": "Personal access token for API authentication"
+      },
+      "username": {
+        "type": "string",
+        "description": "Username for basic authentication"
+      },
+      "password": {
+        "type": "string",
+        "description": "Password for basic authentication"
+      }
+    },
+    "required": ["serverUrl"]
+  },
+  "configUiHints": {
+    "serverUrl": {
+      "label": "Server URL",
+      "description": "Mattermost server URL (e.g., https://mattermost.example.com)"
+    },
+    "botToken": {
+      "label": "Bot Token",
+      "sensitive": true,
+      "description": "Bot account token for authentication"
+    },
+    "personalAccessToken": {
+      "label": "Personal Access Token",
+      "sensitive": true,
+      "description": "Personal access token for API authentication",
+      "advanced": true
+    },
+    "username": {
+      "label": "Username",
+      "description": "Username for basic authentication",
+      "advanced": true
+    },
+    "password": {
+      "label": "Password",
+      "sensitive": true,
+      "description": "Password for basic authentication",
+      "advanced": true
+    }
+  }
+}

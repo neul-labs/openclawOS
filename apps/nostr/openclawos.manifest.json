@@ -1,0 +1,51 @@
+{
+  "id": "@openclawos/nostr",
+  "name": "Nostr Channel",
+  "version": "0.1.0",
+  "description": "Nostr decentralized protocol integration",
+  "type": "app",
+  "main": "dist/index.js",
+  "protocol": {
+    "version": "1.0"
+  },
+  "capabilities": {
+    "channels": {
+      "provides": ["nostr"]
+    },
+    "hooks": {
+      "subscribes": ["message_sending"]
+    },
+    "resources": {
+      "env": ["NOSTR_PRIVATE_KEY"],
+      "network": {
+        "hosts": ["*"]
+      }
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "privateKey": {
+        "type": "string",
+        "description": "Nostr private key (nsec format or hex)"
+      },
+      "relays": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "Nostr relay URLs"
+      }
+    },
+    "required": ["privateKey", "relays"]
+  },
+  "configUiHints": {
+    "privateKey": {
+      "label": "Private Key",
+      "description": "Your Nostr private key (nsec or hex format)",
+      "sensitive": true
+    },
+    "relays": {
+      "label": "Relays",
+      "description": "List of Nostr relay URLs to connect to"
+    }
+  }
+}

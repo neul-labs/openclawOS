@@ -52,6 +52,46 @@ export class CapabilityTracker extends EventEmitter<CapabilityTrackerEvents> {
   private gatewayMethodMap = new Map<string, string>();
 
   /**
+   * Check if registering a capability would conflict with an existing one.
+   * Returns null if no conflict, or an error message if there's a conflict.
+   */
+  checkConflict(type: CapabilityType, config: unknown): string | null {
+    const cfg = config as Record<string, unknown>;
+
+    switch (type) {
+      case "channel": {
+        const channelId = cfg?.channelId as string | undefined;
+        if (channelId && this.channelMap.has(channelId)) {
+          const existingCapId = this.channelMap.get(channelId)!;
+          const existingCap = this.capabilities.get(existingCapId);
+          return `Channel "${channelId}" is already registered by app "${existingCap?.appId}"`;
+        }
+        break;
+      }
+      case "tool": {
+        const toolId = cfg?.toolId as string | undefined;
+        if (toolId && this.toolMap.has(toolId)) {
+          const existingCapId = this.toolMap.get(toolId)!;
+          const existingCap = this.capabilities.get(existingCapId);
+          return `Tool "${toolId}" is already registered by app "${existingCap?.appId}"`;
+        }
+        break;
+      }
+      case "gateway_method": {
+        const methodName = cfg?.methodName as string | undefined;
+        if (methodName && this.gatewayMethodMap.has(methodName)) {
+          const existingCapId = this.gatewayMethodMap.get(methodName)!;
+          const existingCap = this.capabilities.get(existingCapId);
+          return `Gateway method "${methodName}" is already registered by app "${existingCap?.appId}"`;
+        }
+        break;
+      }
+    }
+
+    return null;
+  }
+
+  /**
    * Register a capability
    */
   register(appId: string, type: CapabilityType, config: unknown): string {

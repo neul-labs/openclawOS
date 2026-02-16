@@ -1,0 +1,95 @@
+{
+  "id": "@openclawos/irc",
+  "name": "IRC Channel",
+  "version": "0.1.0",
+  "description": "IRC chat integration",
+  "type": "app",
+  "main": "dist/index.js",
+  "protocol": {
+    "version": "1.0"
+  },
+  "capabilities": {
+    "channels": {
+      "provides": ["irc"]
+    },
+    "hooks": {
+      "subscribes": ["message_sending"]
+    },
+    "resources": {
+      "env": ["IRC_PASSWORD", "IRC_NICKSERV_PASSWORD"],
+      "network": {
+        "hosts": ["*"]
+      }
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "host": {
+        "type": "string",
+        "description": "IRC server hostname"
+      },
+      "port": {
+        "type": "integer",
+        "description": "IRC server port",
+        "default": 6697
+      },
+      "tls": {
+        "type": "boolean",
+        "description": "Use TLS/SSL connection",
+        "default": true
+      },
+      "nick": {
+        "type": "string",
+        "description": "Bot nickname"
+      },
+      "username": {
+        "type": "string",
+        "description": "IRC username"
+      },
+      "realname": {
+        "type": "string",
+        "description": "IRC realname"
+      },
+      "password": {
+        "type": "string",
+        "description": "Server password"
+      },
+      "channels": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "Channels to join on connect"
+      }
+    },
+    "required": ["host", "nick"]
+  },
+  "configUiHints": {
+    "host": {
+      "label": "Server Host",
+      "description": "IRC server hostname (e.g., irc.libera.chat)"
+    },
+    "port": {
+      "label": "Port",
+      "description": "Usually 6697 for TLS, 6667 for plain"
+    },
+    "tls": {
+      "label": "Use TLS",
+      "description": "Enable secure connection (recommended)"
+    },
+    "nick": {
+      "label": "Nickname",
+      "description": "Bot's IRC nickname"
+    },
+    "password": {
+      "label": "Server Password",
+      "sensitive": true,
+      "description": "Optional server password",
+      "advanced": true
+    },
+    "channels": {
+      "label": "Auto-join Channels",
+      "description": "Channels to join automatically (e.g., #general)",
+      "advanced": true
+    }
+  }
+}

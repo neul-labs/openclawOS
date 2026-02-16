@@ -2,11 +2,12 @@
   "name": "@openclaw/line",
   "version": "2026.2.15",
   "private": true,
-  "description": "OpenClaw LINE channel plugin",
+  "description": "OpenClaw LINE channel plugin (DEPRECATED: Use @openclawos/app-line instead)",
   "type": "module",
   "devDependencies": {
     "openclaw": "workspace:*"
   },
+  "deprecated": "This extension is deprecated. Please use @openclawos/app-line instead.",
   "openclaw": {
     "extensions": [
       "./index.ts"

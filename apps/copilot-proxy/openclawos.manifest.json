@@ -1,0 +1,47 @@
+{
+  "id": "@openclawos/copilot-proxy",
+  "name": "GitHub Copilot Proxy",
+  "version": "0.1.0",
+  "description": "GitHub Copilot proxy integration",
+  "type": "app",
+  "main": "dist/index.js",
+  "protocol": {
+    "version": "1.0"
+  },
+  "capabilities": {
+    "gateway": {
+      "methods": ["proxy_request"]
+    },
+    "resources": {
+      "network": {
+        "hosts": ["*"]
+      }
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "port": {
+        "type": "integer",
+        "description": "Port to listen on for proxy requests",
+        "default": 8080
+      },
+      "upstreamUrl": {
+        "type": "string",
+        "description": "Upstream GitHub Copilot API URL",
+        "default": "https://api.githubcopilot.com"
+      }
+    },
+    "required": ["port", "upstreamUrl"]
+  },
+  "configUiHints": {
+    "port": {
+      "label": "Proxy Port",
+      "description": "Port number for the local proxy server"
+    },
+    "upstreamUrl": {
+      "label": "Upstream URL",
+      "description": "GitHub Copilot API upstream URL"
+    }
+  }
+}

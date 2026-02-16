@@ -11,6 +11,7 @@
   "devDependencies": {
     "openclaw": "workspace:*"
   },
+  "deprecated": "This extension is deprecated. Please use @openclawos/app-feishu instead.",
   "openclaw": {
     "extensions": [
       "./index.ts"

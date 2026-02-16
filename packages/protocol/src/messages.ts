@@ -22,6 +22,8 @@ export interface IPCRequest extends IPCMessageBase {
   method: string;
   /** Method parameters */
   params: unknown;
+  /** Authentication token (required after app.register) */
+  token?: string;
 }
 
 /** Response from kernel to app */
