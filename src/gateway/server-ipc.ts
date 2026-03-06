@@ -185,23 +185,83 @@ export async function initIPCIntegration(
  */
 export async function spawnConfiguredApps(
   handle: IPCIntegrationHandle,
-  config: { apps?: Record<string, { enabled?: boolean }> },
+  config: {
+    apps?: Record<string, { enabled?: boolean }>;
+    channels?: Record<string, unknown>;
+  },
   workspaceDir: string,
   log: SubsystemLogger,
 ): Promise<void> {
   const { supervisor } = handle;
-  const apps = config.apps || {};
+  const requestedApps = new Map<string, { enabled?: boolean }>();
+  const explicitApps = config.apps || {};
 
-  for (const [appName, appConfig] of Object.entries(apps)) {
+  for (const [appName, appConfig] of Object.entries(explicitApps)) {
+    requestedApps.set(appName, appConfig);
+  }
+
+  // Channel control plane: if a channel account is configured for IPC runtime,
+  // ensure its corresponding channel app is requested.
+  const channels = config.channels;
+  if (channels && typeof channels === "object") {
+    for (const [channelId, rawChannelConfig] of Object.entries(channels)) {
+      if (channelId === "defaults") {
+        continue;
+      }
+      const channelConfig =
+        rawChannelConfig && typeof rawChannelConfig === "object"
+          ? (rawChannelConfig as { runtime?: unknown; enabled?: unknown; accounts?: unknown })
+          : null;
+      if (!channelConfig) {
+        continue;
+      }
+
+      const rootIpcEnabled =
+        channelConfig.runtime === "ipc" && (channelConfig.enabled as boolean | undefined) !== false;
+      let accountIpcEnabled = false;
+
+      if (!rootIpcEnabled && channelConfig.accounts && typeof channelConfig.accounts === "object") {
+        for (const account of Object.values(channelConfig.accounts as Record<string, unknown>)) {
+          if (!account || typeof account !== "object") {
+            continue;
+          }
+          const typed = account as { runtime?: unknown; enabled?: unknown };
+          if (typed.runtime === "ipc" && (typed.enabled as boolean | undefined) !== false) {
+            accountIpcEnabled = true;
+            break;
+          }
+        }
+      }
+
+      if (!rootIpcEnabled && !accountIpcEnabled) {
+        continue;
+      }
+
+      const scopedAppId = `@openclawos/${channelId}`;
+      const explicitRuntimeConfig =
+        explicitApps[channelId] ?? explicitApps[scopedAppId] ?? requestedApps.get(scopedAppId);
+      if (explicitRuntimeConfig?.enabled === false) {
+        continue;
+      }
+      if (!requestedApps.has(channelId) && !requestedApps.has(scopedAppId)) {
+        requestedApps.set(scopedAppId, { enabled: true });
+      }
+    }
+  }
+
+  for (const [appName, appConfig] of requestedApps) {
     if (appConfig.enabled === false) {
       continue;
     }
 
+    const normalizedName = appName.replace(/^@openclawos\//, "");
+
     // Resolve app directory - try different naming conventions
     const possibleDirs = [
       path.join(workspaceDir, "apps", appName),
+      path.join(workspaceDir, "apps", normalizedName),
       path.join(workspaceDir, "apps", `openclawos-${appName}`),
-      path.join(workspaceDir, "apps", appName.replace("@openclawos/", "")),
+      path.join(workspaceDir, "apps", `openclawos-${normalizedName}`),
     ];
 
     let appDir: string | null = null;

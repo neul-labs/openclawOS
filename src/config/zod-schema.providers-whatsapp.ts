@@ -32,6 +32,8 @@ const WhatsAppAckReactionSchema = z
   .optional();
 
 const WhatsAppSharedSchema = z.object({
+  runtime: z.enum(["in-process", "ipc"]).optional(),
+  enabled: z.boolean().optional(),
   capabilities: z.array(z.string()).optional(),
   markdown: MarkdownConfigSchema,
   configWrites: z.boolean().optional(),
@@ -80,7 +82,6 @@ function enforceOpenDmPolicyAllowFromStar(params: {
 
 export const WhatsAppAccountSchema = WhatsAppSharedSchema.extend({
   name: z.string().optional(),
-  enabled: z.boolean().optional(),
   /** Override auth directory for this WhatsApp account (Baileys multi-file auth state). */
   authDir: z.string().optional(),
   mediaMaxMb: z.number().int().positive().optional(),

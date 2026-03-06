@@ -124,6 +124,7 @@ export const PackageInfoSchema = Type.Object(
 export const AppsListParamsSchema = Type.Object(
   {
     type: Type.Optional(PackageTypeSchema),
+    accountId: Type.Optional(Type.String()),
     installed: Type.Optional(Type.Boolean()),
     enabled: Type.Optional(Type.Boolean()),
     builtin: Type.Optional(Type.Boolean()),
@@ -148,6 +149,7 @@ export const AppsListResultSchema = Type.Object(
 export const AppsInfoParamsSchema = Type.Object(
   {
     packageId: NonEmptyString,
+    accountId: Type.Optional(Type.String()),
   },
   { additionalProperties: false },
 );
@@ -169,6 +171,7 @@ export const AppsInfoResultSchema = Type.Object(
 export const AppsInstallParamsSchema = Type.Object(
   {
     packageId: NonEmptyString,
+    accountId: Type.Optional(Type.String()),
     version: Type.Optional(Type.String()),
   },
   { additionalProperties: false },
@@ -194,6 +197,7 @@ export const AppsInstallResultSchema = Type.Object(
 export const AppsUninstallParamsSchema = Type.Object(
   {
     packageId: NonEmptyString,
+    accountId: Type.Optional(Type.String()),
     purgeData: Type.Optional(Type.Boolean()),
     force: Type.Optional(Type.Boolean()),
   },
@@ -217,6 +221,7 @@ export const AppsUninstallResultSchema = Type.Object(
 export const AppsConfigureParamsSchema = Type.Object(
   {
     packageId: NonEmptyString,
+    accountId: Type.Optional(Type.String()),
     config: Type.Record(Type.String(), Type.Unknown()),
     merge: Type.Optional(Type.Boolean()),
     validate: Type.Optional(Type.Boolean()),
@@ -251,6 +256,7 @@ export const AppsConfigureResultSchema = Type.Object(
 export const AppsGetConfigParamsSchema = Type.Object(
   {
     packageId: NonEmptyString,
+    accountId: Type.Optional(Type.String()),
   },
   { additionalProperties: false },
 );
@@ -269,6 +275,7 @@ export const AppsGetConfigResultSchema = Type.Object(
 export const AppsSetEnabledParamsSchema = Type.Object(
   {
     packageId: NonEmptyString,
+    accountId: Type.Optional(Type.String()),
     enabled: Type.Boolean(),
   },
   { additionalProperties: false },
@@ -289,6 +296,7 @@ export const AppsSetEnabledResultSchema = Type.Object(
 export const AppsStatusParamsSchema = Type.Object(
   {
     packageId: NonEmptyString,
+    accountId: Type.Optional(Type.String()),
   },
   { additionalProperties: false },
 );
@@ -375,6 +383,7 @@ export const AppsGetUiManifestResultSchema = Type.Object(
 export const AppsLifecycleParamsSchema = Type.Object(
   {
     packageId: NonEmptyString,
+    accountId: Type.Optional(Type.String()),
   },
   { additionalProperties: false },
 );

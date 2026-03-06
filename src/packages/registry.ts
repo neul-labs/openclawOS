@@ -59,6 +59,7 @@ export function createPackageRegistry(options: RegistryOptions): PackageRegistry
 
   // Cache for loaded manifests
   const manifestCache = new Map<string, PackageManifest>();
+  const dirCache = new Map<string, string>();
 
   /**
    * Get real app status from supervisor if available.
@@ -120,6 +121,7 @@ export function createPackageRegistry(options: RegistryOptions): PackageRegistry
 
         if (manifest) {
           manifestCache.set(manifest.id, manifest);
+          dirCache.set(manifest.id, appDir);
           packages.set(manifest.id, manifest);
         }
       }
@@ -128,6 +130,45 @@ export function createPackageRegistry(options: RegistryOptions): PackageRegistry
     }
 
     return packages;
+  }
+
+  function buildPackageDirCandidates(packageId: string): string[] {
+    const unscopedName = packageId.includes("/")
+      ? packageId.split("/").at(-1) || packageId
+      : packageId;
+    return Array.from(
+      new Set([
+        path.join(appsDir, packageId),
+        path.join(appsDir, packageId.replace(/^@/, "").replace("/", "-")),
+        path.join(appsDir, packageId.replace(/^@openclawos\//, "")),
+        path.join(appsDir, unscopedName),
+      ]),
+    );
+  }
+
+  async function resolvePackageDir(packageId: string): Promise<string | null> {
+    const cached = dirCache.get(packageId);
+    if (cached) {
+      try {
+        await fs.access(cached);
+        return cached;
+      } catch {
+        // Fall through to candidate resolution.
+      }
+    }
+
+    for (const candidate of buildPackageDirCandidates(packageId)) {
+      const manifest = await loadManifestFromDir(candidate);
+      if (manifest?.id === packageId) {
+        manifestCache.set(packageId, manifest);
+        dirCache.set(packageId, candidate);
+        return candidate;
+      }
+    }
+
+    // Populate cache from full scan as a final fallback.
+    await scanAppsDirectory();
+    return dirCache.get(packageId) ?? null;
   }
 
   /**
@@ -287,7 +328,7 @@ export function createPackageRegistry(options: RegistryOptions): PackageRegistry
       const installedApps = await scanAppsDirectory();
 
       for (const [packageId, manifest] of installedApps) {
-        const installDir = path.join(appsDir, packageId.replace(/^@/, "").replace("/", "-"));
+        const installDir = dirCache.get(packageId) || path.join(appsDir, packageId);
         const config = await getPackageConfig(packageId);
         const enabled = config.enabled !== false;
 
@@ -347,7 +388,7 @@ export function createPackageRegistry(options: RegistryOptions): PackageRegistry
         return null;
       }
 
-      const installDir = path.join(appsDir, packageId.replace(/^@/, "").replace("/", "-"));
+      const installDir = (await resolvePackageDir(packageId)) || path.join(appsDir, packageId);
       const config = await getPackageConfig(packageId);
       const enabled = config.enabled !== false;
 
@@ -368,11 +409,15 @@ export function createPackageRegistry(options: RegistryOptions): PackageRegistry
       }
 
       // Try to load from apps directory
-      const appDir = path.join(appsDir, packageId.replace(/^@/, "").replace("/", "-"));
+      const appDir = await resolvePackageDir(packageId);
+      if (!appDir) {
+        return null;
+      }
       const manifest = await loadManifestFromDir(appDir);
 
       if (manifest) {
         manifestCache.set(packageId, manifest);
+        dirCache.set(packageId, appDir);
       }
 
       return manifest;
@@ -458,7 +503,7 @@ export function createPackageRegistry(options: RegistryOptions): PackageRegistry
       // Disable the package
       await savePackageConfig(packageId, { enabled: false });
 
-      const installDir = path.join(appsDir, packageId.replace(/^@/, "").replace("/", "-"));
+      const installDir = (await resolvePackageDir(packageId)) || path.join(appsDir, packageId);
 
       try {
         if (opts?.purgeData) {

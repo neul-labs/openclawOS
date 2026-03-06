@@ -178,14 +178,14 @@ function handleAppShutdown(deps: HandlerDependencies): IPCMethodHandler {
 function validateCapabilityAgainstManifest(
   type: string,
   config: unknown,
-  manifest: { capabilities?: Record<string, unknown> },
+  manifest: { capabilities?: unknown },
 ): string | null {
-  const caps = manifest.capabilities || {};
+  const caps = (manifest.capabilities as Record<string, unknown> | undefined) || {};
   const cfg = config as Record<string, unknown>;
 
   switch (type) {
     case "channel": {
-      const channelId = cfg?.channelId;
+      const channelId = cfg?.channelId ?? cfg?.id;
       const provides = (caps.channels as Record<string, unknown>)?.provides;
       if (!Array.isArray(provides) || !provides.includes(channelId)) {
         return `Channel "${channelId}" not declared in manifest capabilities.channels.provides`;
@@ -193,7 +193,7 @@ function validateCapabilityAgainstManifest(
       break;
     }
     case "tool": {
-      const toolId = cfg?.toolId;
+      const toolId = cfg?.toolId ?? cfg?.name;
       const provides = (caps.tools as Record<string, unknown>)?.provides;
       if (!Array.isArray(provides) || !provides.includes(toolId)) {
         return `Tool "${toolId}" not declared in manifest capabilities.tools.provides`;
@@ -214,7 +214,7 @@ function validateCapabilityAgainstManifest(
       break;
     }
     case "gateway_method": {
-      const methodName = cfg?.methodName;
+      const methodName = cfg?.methodName ?? cfg?.method;
       const methods = (caps.gateway as Record<string, unknown>)?.methods;
       if (!Array.isArray(methods) || !methods.includes(methodName)) {
         return `Gateway method "${methodName}" not declared in manifest capabilities.gateway.methods`;
@@ -222,7 +222,7 @@ function validateCapabilityAgainstManifest(
       break;
     }
     case "http_route": {
-      const route = cfg?.route;
+      const route = cfg?.route ?? cfg?.path;
       const routes = (caps.gateway as Record<string, unknown>)?.httpRoutes;
       if (!Array.isArray(routes) || !routes.includes(route)) {
         return `HTTP route "${route}" not declared in manifest capabilities.gateway.httpRoutes`;

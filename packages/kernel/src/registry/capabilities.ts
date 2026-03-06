@@ -51,6 +51,21 @@ export class CapabilityTracker extends EventEmitter<CapabilityTrackerEvents> {
   /** Gateway methods: method name -> capability ID */
   private gatewayMethodMap = new Map<string, string>();
 
+  private getChannelId(config: Record<string, unknown>): string | undefined {
+    const channelId = config.channelId ?? config.id;
+    return typeof channelId === "string" && channelId.trim() ? channelId : undefined;
+  }
+
+  private getToolId(config: Record<string, unknown>): string | undefined {
+    const toolId = config.toolId ?? config.name;
+    return typeof toolId === "string" && toolId.trim() ? toolId : undefined;
+  }
+
+  private getGatewayMethodName(config: Record<string, unknown>): string | undefined {
+    const methodName = config.methodName ?? config.method;
+    return typeof methodName === "string" && methodName.trim() ? methodName : undefined;
+  }
+
   /**
    * Check if registering a capability would conflict with an existing one.
    * Returns null if no conflict, or an error message if there's a conflict.
@@ -60,7 +75,7 @@ export class CapabilityTracker extends EventEmitter<CapabilityTrackerEvents> {
 
     switch (type) {
       case "channel": {
-        const channelId = cfg?.channelId as string | undefined;
+        const channelId = this.getChannelId(cfg);
         if (channelId && this.channelMap.has(channelId)) {
           const existingCapId = this.channelMap.get(channelId)!;
           const existingCap = this.capabilities.get(existingCapId);
@@ -69,7 +84,7 @@ export class CapabilityTracker extends EventEmitter<CapabilityTrackerEvents> {
         break;
       }
       case "tool": {
-        const toolId = cfg?.toolId as string | undefined;
+        const toolId = this.getToolId(cfg);
         if (toolId && this.toolMap.has(toolId)) {
           const existingCapId = this.toolMap.get(toolId)!;
           const existingCap = this.capabilities.get(existingCapId);
@@ -78,7 +93,7 @@ export class CapabilityTracker extends EventEmitter<CapabilityTrackerEvents> {
         break;
       }
       case "gateway_method": {
-        const methodName = cfg?.methodName as string | undefined;
+        const methodName = this.getGatewayMethodName(cfg);
         if (methodName && this.gatewayMethodMap.has(methodName)) {
           const existingCapId = this.gatewayMethodMap.get(methodName)!;
           const existingCap = this.capabilities.get(existingCapId);
@@ -312,21 +327,27 @@ export class CapabilityTracker extends EventEmitter<CapabilityTrackerEvents> {
     const config = capability.config as Record<string, unknown>;
 
     switch (capability.type) {
-      case "channel":
-        if (config?.channelId) {
-          this.channelMap.set(config.channelId as string, capability.id);
+      case "channel": {
+        const channelId = this.getChannelId(config);
+        if (channelId) {
+          this.channelMap.set(channelId, capability.id);
         }
         break;
-      case "tool":
-        if (config?.toolId) {
-          this.toolMap.set(config.toolId as string, capability.id);
+      }
+      case "tool": {
+        const toolId = this.getToolId(config);
+        if (toolId) {
+          this.toolMap.set(toolId, capability.id);
         }
         break;
-      case "gateway_method":
-        if (config?.methodName) {
-          this.gatewayMethodMap.set(config.methodName as string, capability.id);
+      }
+      case "gateway_method": {
+        const methodName = this.getGatewayMethodName(config);
+        if (methodName) {
+          this.gatewayMethodMap.set(methodName, capability.id);
         }
         break;
+      }
     }
   }
 
@@ -334,21 +355,27 @@ export class CapabilityTracker extends EventEmitter<CapabilityTrackerEvents> {
     const config = capability.config as Record<string, unknown>;
 
     switch (capability.type) {
-      case "channel":
-        if (config?.channelId) {
-          this.channelMap.delete(config.channelId as string);
+      case "channel": {
+        const channelId = this.getChannelId(config);
+        if (channelId) {
+          this.channelMap.delete(channelId);
         }
         break;
-      case "tool":
-        if (config?.toolId) {
-          this.toolMap.delete(config.toolId as string);
+      }
+      case "tool": {
+        const toolId = this.getToolId(config);
+        if (toolId) {
+          this.toolMap.delete(toolId);
         }
         break;
-      case "gateway_method":
-        if (config?.methodName) {
-          this.gatewayMethodMap.delete(config.methodName as string);
+      }
+      case "gateway_method": {
+        const methodName = this.getGatewayMethodName(config);
+        if (methodName) {
+          this.gatewayMethodMap.delete(methodName);
         }
         break;
+      }
     }
   }
 }

@@ -3,12 +3,10 @@ import type { IconName } from "./icons.js";
 
 export const TAB_GROUPS = [
   { label: "Chat", tabs: ["chat"] },
-  {
-    label: "Control",
-    tabs: ["overview", "channels", "instances", "sessions", "usage", "cron"],
-  },
-  { label: "Agent", tabs: ["agents", "skills", "appstore", "nodes"] },
-  { label: "Settings", tabs: ["config", "debug", "logs"] },
+  { label: "Overview", tabs: ["overview", "instances", "sessions"] },
+  { label: "Agents", tabs: ["agents", "usage", "cron"] },
+  { label: "Apps", tabs: ["appstore"] },
+  { label: "System", tabs: ["config", "nodes", "logs"] },
 ] as const;
 
 // Static tabs are the built-in tabs
@@ -130,11 +128,10 @@ export function getEffectiveTabGroups(
       }
 
       case "after:channels": {
-        // Find channels tab and insert after it
-        const channelsGroup = groups.find((g) => g.tabs.includes("channels" as Tab));
-        if (channelsGroup) {
-          const chanIdx = channelsGroup.tabs.indexOf("channels" as Tab);
-          channelsGroup.tabs.splice(chanIdx + 1, 0, tabId);
+        // Find the Apps group and add to it (channels tab is deprecated)
+        const appsGroup = groups.find((g) => g.label === "Apps");
+        if (appsGroup) {
+          appsGroup.tabs.push(tabId);
         } else {
           appsTabs.push(tabId);
         }

@@ -28,7 +28,7 @@ import type {
   StatusSummary,
   NostrProfile,
 } from "./types.ts";
-import type { NostrProfileFormState } from "./views/channels.nostr-profile-form.ts";
+import type { NostrProfileFormState } from "./views/channels.types.ts";
 import {
   handleChannelConfigReload as handleChannelConfigReloadInternal,
   handleChannelConfigSave as handleChannelConfigSaveInternal,
@@ -307,6 +307,13 @@ export class OpenClawApp extends LitElement {
   @state() appstoreBusyKey: string | null = null;
   @state() appstoreMessages: import("./controllers/appstore.ts").AppStoreMessageMap = {};
   @state() appstoreInstallPending: import("./controllers/appstore.ts").PackageInfo | null = null;
+  @state() appstoreDetailsLoading = false;
+  @state() appstoreDetailsError: string | null = null;
+  @state() appstoreDetails: import("./controllers/appstore.ts").PackageDetails | null = null;
+  @state() appstoreConfigDraft = "{}";
+  @state() appstoreConfigDirty = false;
+  @state() appstoreSelectedScopeAccountId: string | null = null;
+  @state() appstoreAccountScopeByChannel: Record<string, string> = {};
 
   // UI Manifest (app-contributed UI elements)
   @state() uiManifestLoading = false;

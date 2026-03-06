@@ -223,7 +223,8 @@ export function renderOverview(props: OverviewProps) {
             </div>`
             : html`
                 <div class="callout" style="margin-top: 14px">
-                  Use Channels to link WhatsApp, Telegram, Discord, Signal, or iMessage.
+                  Use the App Store to install and configure channel apps for WhatsApp, Telegram, Discord, Signal,
+                  and more.
                 </div>
               `
         }

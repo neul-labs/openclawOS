@@ -1,5 +1,7 @@
 import { html, nothing } from "lit";
+import type { EventLogEntry } from "../app-events.ts";
 import type { ConfigUiHints } from "../types.ts";
+import { formatEventPayload } from "../presenter.ts";
 import { hintForPath, humanize, schemaType, type JsonSchema } from "./config-form.shared.ts";
 import { analyzeConfigSchema, renderConfigForm, SECTION_META } from "./config-form.ts";
 
@@ -32,6 +34,21 @@ export type ConfigProps = {
   onSave: () => void;
   onApply: () => void;
   onUpdate: () => void;
+  // Developer tools (debug) props
+  debugLoading?: boolean;
+  debugStatus?: Record<string, unknown> | null;
+  debugHealth?: Record<string, unknown> | null;
+  debugModels?: unknown[];
+  debugHeartbeat?: unknown;
+  debugEventLog?: EventLogEntry[];
+  debugCallMethod?: string;
+  debugCallParams?: string;
+  debugCallResult?: string | null;
+  debugCallError?: string | null;
+  onDebugCallMethodChange?: (next: string) => void;
+  onDebugCallParamsChange?: (next: string) => void;
+  onDebugRefresh?: () => void;
+  onDebugCall?: () => void;
 };
 
 // SVG Icons for sidebar (Lucide-style)
@@ -254,6 +271,14 @@ const sidebarIcons = {
       <path d="m19.07 10.93-4.24 4.24"></path>
     </svg>
   `,
+  developer: html`
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
+      <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
+      <path d="M2 2l7.586 7.586"></path>
+      <circle cx="11" cy="11" r="2"></circle>
+    </svg>
+  `,
   default: html`
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -263,7 +288,7 @@ const sidebarIcons = {
 };
 
 // Section definitions
-const SECTIONS: Array<{ key: string; label: string }> = [
+const SECTIONS: Array<{ key: string; label: string; isSpecial?: boolean }> = [
   { key: "env", label: "Environment" },
   { key: "update", label: "Updates" },
   { key: "agents", label: "Agents" },
@@ -276,6 +301,7 @@ const SECTIONS: Array<{ key: string; label: string }> = [
   { key: "tools", label: "Tools" },
   { key: "gateway", label: "Gateway" },
   { key: "wizard", label: "Setup Wizard" },
+  { key: "developer", label: "Developer Tools", isSpecial: true },
 ];
 
 type SubsectionEntry = {
@@ -383,6 +409,144 @@ function truncateValue(value: unknown, maxLen = 40): string {
   return str.slice(0, maxLen - 3) + "...";
 }
 
+function renderDeveloperTools(props: ConfigProps) {
+  const securityAudit =
+    props.debugStatus && typeof props.debugStatus === "object"
+      ? (props.debugStatus as { securityAudit?: { summary?: Record<string, number> } })
+          .securityAudit
+      : null;
+  const securitySummary = securityAudit?.summary ?? null;
+  const critical = securitySummary?.critical ?? 0;
+  const warn = securitySummary?.warn ?? 0;
+  const info = securitySummary?.info ?? 0;
+  const securityTone = critical > 0 ? "danger" : warn > 0 ? "warn" : "success";
+  const securityLabel =
+    critical > 0 ? `${critical} critical` : warn > 0 ? `${warn} warnings` : "No critical issues";
+
+  return html`
+    <div class="config-section-hero">
+      <div class="config-section-hero__icon">${sidebarIcons.developer}</div>
+      <div class="config-section-hero__text">
+        <div class="config-section-hero__title">Developer Tools</div>
+        <div class="config-section-hero__desc">Gateway snapshots, events, and manual RPC calls.</div>
+      </div>
+    </div>
+
+    <section class="grid grid-cols-2" style="margin-top: 16px;">
+      <div class="card">
+        <div class="row" style="justify-content: space-between;">
+          <div>
+            <div class="card-title">Snapshots</div>
+            <div class="card-sub">Status, health, and heartbeat data.</div>
+          </div>
+          <button class="btn" ?disabled=${props.debugLoading} @click=${props.onDebugRefresh}>
+            ${props.debugLoading ? "Refreshing…" : "Refresh"}
+          </button>
+        </div>
+        <div class="stack" style="margin-top: 12px;">
+          <details open>
+            <summary class="muted" style="cursor: pointer;">Status</summary>
+            ${
+              securitySummary
+                ? html`<div class="callout ${securityTone}" style="margin-top: 8px;">
+                  Security audit: ${securityLabel}${info > 0 ? ` · ${info} info` : ""}. Run
+                  <span class="mono">openclaw security audit --deep</span> for details.
+                </div>`
+                : nothing
+            }
+            <pre class="code-block">${JSON.stringify(props.debugStatus ?? {}, null, 2)}</pre>
+          </details>
+          <details>
+            <summary class="muted" style="cursor: pointer;">Health</summary>
+            <pre class="code-block">${JSON.stringify(props.debugHealth ?? {}, null, 2)}</pre>
+          </details>
+          <details>
+            <summary class="muted" style="cursor: pointer;">Last heartbeat</summary>
+            <pre class="code-block">${JSON.stringify(props.debugHeartbeat ?? {}, null, 2)}</pre>
+          </details>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Manual RPC</div>
+        <div class="card-sub">Send a raw gateway method with JSON params.</div>
+        <div class="form-grid" style="margin-top: 16px;">
+          <label class="field">
+            <span>Method</span>
+            <input
+              .value=${props.debugCallMethod ?? ""}
+              @input=${(e: Event) => props.onDebugCallMethodChange?.((e.target as HTMLInputElement).value)}
+              placeholder="system-presence"
+            />
+          </label>
+          <label class="field">
+            <span>Params (JSON)</span>
+            <textarea
+              .value=${props.debugCallParams ?? ""}
+              @input=${(e: Event) =>
+                props.onDebugCallParamsChange?.((e.target as HTMLTextAreaElement).value)}
+              rows="6"
+            ></textarea>
+          </label>
+        </div>
+        <div class="row" style="margin-top: 12px;">
+          <button class="btn primary" @click=${props.onDebugCall}>Call</button>
+        </div>
+        ${
+          props.debugCallError
+            ? html`<div class="callout danger" style="margin-top: 12px;">
+              ${props.debugCallError}
+            </div>`
+            : nothing
+        }
+        ${
+          props.debugCallResult
+            ? html`<pre class="code-block" style="margin-top: 12px;">${props.debugCallResult}</pre>`
+            : nothing
+        }
+      </div>
+    </section>
+
+    <section class="card" style="margin-top: 18px;">
+      <div class="card-title">Models</div>
+      <div class="card-sub">Catalog from models.list.</div>
+      <pre class="code-block" style="margin-top: 12px;">${JSON.stringify(
+        props.debugModels ?? [],
+        null,
+        2,
+      )}</pre>
+    </section>
+
+    <section class="card" style="margin-top: 18px;">
+      <div class="card-title">Event Log</div>
+      <div class="card-sub">Latest gateway events.</div>
+      ${
+        (props.debugEventLog?.length ?? 0) === 0
+          ? html`
+              <div class="muted" style="margin-top: 12px">No events yet.</div>
+            `
+          : html`
+            <div class="list" style="margin-top: 12px;">
+              ${(props.debugEventLog ?? []).map(
+                (evt) => html`
+                  <div class="list-item">
+                    <div class="list-main">
+                      <div class="list-title">${evt.event}</div>
+                      <div class="list-sub">${new Date(evt.ts).toLocaleTimeString()}</div>
+                    </div>
+                    <div class="list-meta">
+                      <pre class="code-block">${formatEventPayload(evt.payload)}</pre>
+                    </div>
+                  </div>
+                `,
+              )}
+            </div>
+          `
+      }
+    </section>
+  `;
+}
+
 export function renderConfig(props: ConfigProps) {
   const validity = props.valid == null ? "unknown" : props.valid ? "valid" : "invalid";
   const analysis = analyzeConfigSchema(props.schema);
@@ -390,7 +554,7 @@ export function renderConfig(props: ConfigProps) {
 
   // Get available sections from schema
   const schemaProps = analysis.schema?.properties ?? {};
-  const availableSections = SECTIONS.filter((s) => s.key in schemaProps);
+  const availableSections = SECTIONS.filter((s) => s.key in schemaProps || s.isSpecial);
 
   // Add any sections in schema but not in our list
   const knownKeys = new Set(SECTIONS.map((s) => s.key));
@@ -399,6 +563,9 @@ export function renderConfig(props: ConfigProps) {
     .map((k) => ({ key: k, label: k.charAt(0).toUpperCase() + k.slice(1) }));
 
   const allSections = [...availableSections, ...extraSections];
+
+  // Check if developer section is active
+  const isDeveloperSection = props.activeSection === "developer";
 
   const activeSectionSchema =
     props.activeSection && analysis.schema && schemaType(analysis.schema) === "object"
@@ -631,58 +798,65 @@ export function renderConfig(props: ConfigProps) {
             : nothing
         }
         ${
-          activeSectionMeta && props.formMode === "form"
-            ? html`
-              <div class="config-section-hero">
-                <div class="config-section-hero__icon">
-                  ${getSectionIcon(props.activeSection ?? "")}
-                </div>
-                <div class="config-section-hero__text">
-                  <div class="config-section-hero__title">
-                    ${activeSectionMeta.label}
+          isDeveloperSection
+            ? nothing
+            : activeSectionMeta && props.formMode === "form"
+              ? html`
+                <div class="config-section-hero">
+                  <div class="config-section-hero__icon">
+                    ${getSectionIcon(props.activeSection ?? "")}
                   </div>
-                  ${
-                    activeSectionMeta.description
-                      ? html`<div class="config-section-hero__desc">
-                        ${activeSectionMeta.description}
-                      </div>`
-                      : nothing
-                  }
+                  <div class="config-section-hero__text">
+                    <div class="config-section-hero__title">
+                      ${activeSectionMeta.label}
+                    </div>
+                    ${
+                      activeSectionMeta.description
+                        ? html`<div class="config-section-hero__desc">
+                          ${activeSectionMeta.description}
+                        </div>`
+                        : nothing
+                    }
+                  </div>
                 </div>
-              </div>
-            `
-            : nothing
+              `
+              : nothing
         }
         ${
-          allowSubnav
-            ? html`
-              <div class="config-subnav">
-                <button
-                  class="config-subnav__item ${effectiveSubsection === null ? "active" : ""}"
-                  @click=${() => props.onSubsectionChange(ALL_SUBSECTION)}
-                >
-                  All
-                </button>
-                ${subsections.map(
-                  (entry) => html`
-                    <button
-                      class="config-subnav__item ${
-                        effectiveSubsection === entry.key ? "active" : ""
-                      }"
-                      title=${entry.description || entry.label}
-                      @click=${() => props.onSubsectionChange(entry.key)}
-                    >
-                      ${entry.label}
-                    </button>
-                  `,
-                )}
-              </div>
-            `
-            : nothing
+          isDeveloperSection
+            ? nothing
+            : allowSubnav
+              ? html`
+                <div class="config-subnav">
+                  <button
+                    class="config-subnav__item ${effectiveSubsection === null ? "active" : ""}"
+                    @click=${() => props.onSubsectionChange(ALL_SUBSECTION)}
+                  >
+                    All
+                  </button>
+                  ${subsections.map(
+                    (entry) => html`
+                      <button
+                        class="config-subnav__item ${
+                          effectiveSubsection === entry.key ? "active" : ""
+                        }"
+                        title=${entry.description || entry.label}
+                        @click=${() => props.onSubsectionChange(entry.key)}
+                      >
+                        ${entry.label}
+                      </button>
+                    `,
+                  )}
+                </div>
+              `
+              : nothing
         }
 
+        <!-- Developer Tools content -->
+        ${isDeveloperSection ? renderDeveloperTools(props) : nothing}
+
         <!-- Form content -->
-        <div class="config-content">
+        <div class="config-content" style="${isDeveloperSection ? "display: none;" : ""}">
           ${
             props.formMode === "form"
               ? html`

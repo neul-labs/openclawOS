@@ -113,6 +113,10 @@ function listReloadRules(): ReloadRule[] {
         kind: "none",
       }),
     ),
+    {
+      prefix: `apps.@openclawos/${plugin.id}`,
+      kind: "none",
+    } satisfies ReloadRule,
   ]);
   const rules = [...BASE_RELOAD_RULES, ...channelReloadRules, ...BASE_RELOAD_RULES_TAIL];
   cachedReloadRules = rules;

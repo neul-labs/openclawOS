@@ -11,6 +11,12 @@ import {
 import { formatError } from "./server-utils.js";
 import { setBroadcastHealthUpdate } from "./server/health-state.js";
 
+// Configurable TTL for aborted run cleanup (default: 5 minutes for CLI, 1 hour legacy)
+// Use OPENCLAW_CHAT_CLEANUP_TTL_MS env var to override
+const DEFAULT_ABORTED_RUN_TTL_MS = 5 * 60_000; // 5 minutes (optimized for CLI)
+const ABORTED_RUN_TTL_MS =
+  Number(process.env.OPENCLAW_CHAT_CLEANUP_TTL_MS) || DEFAULT_ABORTED_RUN_TTL_MS;
+
 export function startGatewayMaintenanceTimers(params: {
   broadcast: (
     event: string,
@@ -118,7 +124,6 @@ export function startGatewayMaintenanceTimers(params: {
       );
     }
 
-    const ABORTED_RUN_TTL_MS = 60 * 60_000;
     for (const [runId, abortedAt] of params.chatRunState.abortedRuns) {
       if (now - abortedAt <= ABORTED_RUN_TTL_MS) {
         continue;

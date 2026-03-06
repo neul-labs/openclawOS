@@ -6,6 +6,7 @@ export type AcpSession = {
   sessionKey: string;
   cwd: string;
   createdAt: number;
+  lastAccessedAt: number;
   abortController: AbortController | null;
   activeRunId: string | null;
 };

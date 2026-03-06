@@ -37,6 +37,26 @@ function isAccountEnabled(account: unknown): boolean {
   return enabled !== false;
 }
 
+function isRuntimeMode(value: unknown): value is "in-process" | "ipc" {
+  return value === "in-process" || value === "ipc";
+}
+
+function resolveAccountRuntimeMode(account: unknown): "in-process" | "ipc" | undefined {
+  if (!account || typeof account !== "object") {
+    return undefined;
+  }
+  const directRuntime = (account as { runtime?: unknown }).runtime;
+  if (isRuntimeMode(directRuntime)) {
+    return directRuntime;
+  }
+  const nestedConfig = (account as { config?: unknown }).config;
+  if (!nestedConfig || typeof nestedConfig !== "object") {
+    return undefined;
+  }
+  const configRuntime = (nestedConfig as { runtime?: unknown }).runtime;
+  return isRuntimeMode(configRuntime) ? configRuntime : undefined;
+}
+
 function resolveDefaultRuntime(channelId: ChannelId): ChannelAccountSnapshot {
   const plugin = getChannelPlugin(channelId);
   return plugin?.status?.defaultRuntime ?? { accountId: DEFAULT_ACCOUNT_ID };
@@ -115,14 +135,15 @@ export function createChannelManager(opts: ChannelManagerOptions): ChannelManage
         const account = plugin.config.resolveAccount(cfg, id);
 
         // Check if channel should run via IPC instead of in-process
-        const runtimeMode = (account as { runtime?: "in-process" | "ipc" })?.runtime;
+        const runtimeMode = resolveAccountRuntimeMode(account);
         if (runtimeMode === "ipc") {
           const log = channelLogs[channelId];
           log.info?.(`[${id}] channel running via IPC app, skipping in-process startup`);
           setRuntime(channelId, id, {
             accountId: id,
-            running: true,
-            lastStartAt: Date.now(),
+            running: false,
+            mode: "ipc",
+            lastStopAt: Date.now(),
             lastError: null,
           });
           return;

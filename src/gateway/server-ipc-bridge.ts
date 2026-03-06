@@ -34,22 +34,14 @@ export function createIPCHookBridge(opts: IPCHookBridgeOptions | null): IPCHookB
 
   // Type-safe access to capability tracker methods
   const getHookSubscribers = (hookName: string): string[] => {
-    // The capability tracker's getCapabilities method returns all registered capabilities
-    // We need to filter for hook subscriptions that match the given hook name
     const tracker = capabilities as {
-      getCapabilities?: (type: string) => Array<{ appId: string; data: unknown }>;
+      getHookSubscribers?: (event: string) => string[];
     };
-    if (!tracker.getCapabilities) {
+    if (typeof tracker.getHookSubscribers !== "function") {
       return [];
     }
     try {
-      const hookCaps = tracker.getCapabilities("hook.subscribe");
-      return hookCaps
-        .filter((cap) => {
-          const data = cap.data as { hookName?: string } | undefined;
-          return data?.hookName === hookName;
-        })
-        .map((cap) => cap.appId);
+      return tracker.getHookSubscribers(hookName);
     } catch {
       return [];
     }
@@ -102,8 +94,25 @@ export function createIPCHookBridge(opts: IPCHookBridgeOptions | null): IPCHookB
 
       log.debug(`Forwarding hook ${hookName} to ${subscribers.length} IPC apps`);
 
+      const context = (() => {
+        const raw = payload as { channelId?: unknown; metadata?: { accountId?: unknown } } | null;
+        if (!raw || typeof raw !== "object") {
+          return {};
+        }
+        const accountId =
+          raw.metadata && typeof raw.metadata === "object" ? raw.metadata.accountId : undefined;
+        return {
+          channelId: typeof raw.channelId === "string" ? raw.channelId : undefined,
+          accountId: typeof accountId === "string" ? accountId : undefined,
+        };
+      })();
+
       for (const appId of subscribers) {
-        const sent = sendToApp(appId, `hook:${hookName}`, payload);
+        const sent = sendToApp(appId, `hook:${hookName}`, {
+          eventId: crypto.randomUUID(),
+          data: payload,
+          context,
+        });
         if (!sent) {
           log.warn(`Failed to forward hook ${hookName} to app ${appId}`);
         }

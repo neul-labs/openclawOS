@@ -503,6 +503,8 @@ async function deliverOutboundPayloadsCore(
       // Forward to IPC apps that subscribed to message_sending
       // This allows process-isolated channel apps to receive outbound messages
       forwardHookToIPC("message_sending", {
+        target: to,
+        // Keep legacy field for compatibility.
         to,
         content: payloadSummary.text,
         metadata: { channel, accountId, mediaUrls: payloadSummary.mediaUrls },

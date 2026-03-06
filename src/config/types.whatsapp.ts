@@ -38,8 +38,17 @@ export type WhatsAppAckReactionConfig = {
 export type WhatsAppConfig = {
   /** Optional per-account WhatsApp configuration (multi-account). */
   accounts?: Record<string, WhatsAppAccountConfig>;
+  /**
+   * Runtime mode for this channel:
+   * - "in-process": runs within the gateway process (legacy)
+   * - "ipc" (recommended): runs as an isolated OpenClawOS app via IPC
+   * @default "in-process" for backwards compatibility, but "ipc" is recommended
+   */
+  runtime?: "in-process" | "ipc";
   /** Optional provider capability tags used for agent/runtime guidance. */
   capabilities?: string[];
+  /** If false, do not start the default WhatsApp account provider. Default: true. */
+  enabled?: boolean;
   /** Markdown formatting overrides (tables). */
   markdown?: MarkdownConfig;
   /** Allow channel-initiated config writes (default: true). */

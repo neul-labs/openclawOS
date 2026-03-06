@@ -25,6 +25,11 @@ import type { PluginsConfig } from "./types.plugins.js";
 import type { SkillsConfig } from "./types.skills.js";
 import type { ToolsConfig } from "./types.tools.js";
 
+export type OpenClawAppConfig = {
+  /** If false, do not auto-start this app. Default: true. */
+  enabled?: boolean;
+};
+
 export type OpenClawConfig = {
   meta?: {
     /** Last OpenClaw version that wrote this config. */
@@ -90,6 +95,8 @@ export type OpenClawConfig = {
   session?: SessionConfig;
   web?: WebConfig;
   channels?: ChannelsConfig;
+  /** Process-isolated app runtime controls keyed by app name or package ID. */
+  apps?: Record<string, OpenClawAppConfig>;
   cron?: CronConfig;
   hooks?: HooksConfig;
   discovery?: DiscoveryConfig;

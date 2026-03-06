@@ -47,7 +47,7 @@ function resolveOrg(): string {
   return "myorg";
 }
 
-function validatePackageName(value: string): string | undefined {
+function validatePackageName(value: string | undefined): string | undefined {
   if (!value || value.trim().length === 0) {
     return "Package name is required";
   }
@@ -57,7 +57,7 @@ function validatePackageName(value: string): string | undefined {
   return undefined;
 }
 
-function validateOrg(value: string): string | undefined {
+function validateOrg(value: string | undefined): string | undefined {
   if (!value || value.trim().length === 0) {
     return "Organization is required";
   }

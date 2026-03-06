@@ -669,12 +669,7 @@ export async function startGatewayServer(
 
   // Spawn configured OpenClawOS apps (if IPC is enabled)
   if (!minimalTestGateway && ipcHandle) {
-    await spawnConfiguredApps(
-      ipcHandle,
-      cfgAtStart as { apps?: Record<string, { enabled?: boolean }> },
-      defaultWorkspaceDir,
-      log.child("apps"),
-    );
+    await spawnConfiguredApps(ipcHandle, cfgAtStart, defaultWorkspaceDir, log.child("apps"));
   }
 
   // Run gateway_start plugin hook (fire-and-forget)

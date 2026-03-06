@@ -7,10 +7,12 @@
 import { html, nothing } from "lit";
 import type {
   AppStoreMessageMap,
+  PackageDetails,
   PackageCategory,
   PackageInfo,
   PackageType,
 } from "../controllers/appstore.ts";
+import type { ChannelAccountSnapshot } from "../types.ts";
 import { clampText } from "../format.ts";
 import { renderInstallModal } from "./appstore-install-modal.ts";
 
@@ -24,6 +26,14 @@ export type AppStoreProps = {
   busyKey: string | null;
   messages: AppStoreMessageMap;
   installPending: PackageInfo | null;
+  detailsLoading: boolean;
+  detailsError: string | null;
+  details: PackageDetails | null;
+  configDraft: string;
+  configDirty: boolean;
+  selectedScopeAccountId: string | null;
+  channelAccounts: Record<string, ChannelAccountSnapshot[]>;
+  channelScopeById: Record<string, string>;
   onFilterChange: (next: string) => void;
   onCategoryChange: (next: PackageCategory) => void;
   onSelect: (packageId: string | null) => void;
@@ -36,6 +46,10 @@ export type AppStoreProps = {
   onStop: (packageId: string) => void;
   onRestart: (packageId: string) => void;
   onRefresh: () => void;
+  onScopeChange: (channelId: string, accountId: string) => void;
+  onConfigDraftChange: (draft: string) => void;
+  onConfigDraftReset: () => void;
+  onConfigSave: () => void;
 };
 
 const CATEGORY_LABELS: Record<PackageCategory, string> = {
@@ -155,7 +169,46 @@ export function renderAppStore(props: AppStoreProps) {
             </div>
           `
       }
+
+      ${renderPackageDetailsPanel(props)}
     </section>
+  `;
+}
+
+function resolveChannelId(packageId: string): string | null {
+  return packageId.includes("/") ? (packageId.split("/").at(-1) ?? null) : null;
+}
+
+function renderScopeSelector(pkg: PackageInfo, props: AppStoreProps) {
+  const channelId = resolveChannelId(pkg.id);
+  if (!channelId) {
+    return nothing;
+  }
+  const accounts = props.channelAccounts[channelId] ?? [];
+  if (accounts.length <= 1) {
+    return nothing;
+  }
+  const selected = props.selectedId === pkg.id ? props.selectedScopeAccountId : null;
+  const current = props.channelScopeById[channelId] ?? selected ?? accounts[0]?.accountId ?? "";
+  return html`
+    <label class="field" style="min-width: 180px;">
+      <span>Account</span>
+      <select
+        .value=${current}
+        @click=${(e: Event) => e.stopPropagation()}
+        @change=${(e: Event) => {
+          e.stopPropagation();
+          const next = (e.target as HTMLSelectElement).value;
+          props.onScopeChange(channelId, next);
+        }}
+      >
+        ${accounts.map(
+          (account) => html`
+            <option value=${account.accountId}>${account.name || account.accountId}</option>
+          `,
+        )}
+      </select>
+    </label>
   `;
 }
 
@@ -251,6 +304,7 @@ function renderPackageCard(pkg: PackageInfo, props: AppStoreProps) {
       </div>
       <div class="list-meta">
         <div class="row" style="justify-content: flex-end; flex-wrap: wrap; gap: 8px;">
+          ${renderScopeSelector(pkg, props)}
           ${renderPackageActions(pkg, busy, props)}
         </div>
         ${
@@ -434,4 +488,79 @@ function renderPackageActions(pkg: PackageInfo, busy: boolean, props: AppStorePr
   }
 
   return actions;
+}
+
+function renderPackageDetailsPanel(props: AppStoreProps) {
+  if (!props.selectedId) {
+    return nothing;
+  }
+  if (props.detailsLoading) {
+    return html`
+      <section class="card" style="margin-top: 16px">
+        <div class="card-title">Package Details</div>
+        <div class="muted" style="margin-top: 8px">Loading details...</div>
+      </section>
+    `;
+  }
+
+  return html`
+    <section class="card" style="margin-top: 16px;">
+      <div class="row" style="justify-content: space-between;">
+        <div>
+          <div class="card-title">Package Details</div>
+          <div class="card-sub mono">${props.selectedId}</div>
+        </div>
+        <div class="muted">
+          Scope:
+          ${props.selectedScopeAccountId ? props.selectedScopeAccountId : "default"}
+        </div>
+      </div>
+
+      ${
+        props.detailsError
+          ? html`<div class="callout danger" style="margin-top: 12px;">${props.detailsError}</div>`
+          : nothing
+      }
+
+      ${
+        props.details
+          ? html`
+            <div class="muted" style="margin-top: 12px;">
+              ${props.details.package.name} v${props.details.package.version}
+            </div>
+            <label class="field" style="margin-top: 12px;">
+              <span>Config (JSON)</span>
+              <textarea
+                rows="12"
+                .value=${props.configDraft}
+                @input=${(e: Event) => props.onConfigDraftChange((e.target as HTMLTextAreaElement).value)}
+              ></textarea>
+            </label>
+            <div class="row" style="justify-content: flex-end; gap: 8px; margin-top: 10px;">
+              <button
+                class="btn"
+                ?disabled=${!props.configDirty}
+                @click=${() => props.onConfigDraftReset()}
+              >
+                Reset
+              </button>
+              <button
+                class="btn primary"
+                ?disabled=${!props.configDirty || Boolean(props.busyKey)}
+                @click=${() => props.onConfigSave()}
+              >
+                Save Config
+              </button>
+            </div>
+            <details style="margin-top: 10px;">
+              <summary class="muted">Config Schema</summary>
+              <pre class="code-block" style="margin-top: 8px;">${JSON.stringify(props.details.configSchema ?? {}, null, 2)}</pre>
+            </details>
+          `
+          : html`
+              <div class="muted" style="margin-top: 12px">Select a package to inspect details.</div>
+            `
+      }
+    </section>
+  `;
 }

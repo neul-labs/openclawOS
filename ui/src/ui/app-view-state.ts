@@ -33,7 +33,7 @@ import type {
   StatusSummary,
 } from "./types.ts";
 import type { ChatAttachment, ChatQueueItem, CronFormState } from "./ui-types.ts";
-import type { NostrProfileFormState } from "./views/channels.nostr-profile-form.ts";
+import type { NostrProfileFormState } from "./views/channels.types.ts";
 import type { SessionLogEntry } from "./views/usage.ts";
 
 export type AppViewState = {
@@ -207,6 +207,13 @@ export type AppViewState = {
   appstoreBusyKey: string | null;
   appstoreMessages: import("./controllers/appstore.ts").AppStoreMessageMap;
   appstoreInstallPending: import("./controllers/appstore.ts").PackageInfo | null;
+  appstoreDetailsLoading: boolean;
+  appstoreDetailsError: string | null;
+  appstoreDetails: import("./controllers/appstore.ts").PackageDetails | null;
+  appstoreConfigDraft: string;
+  appstoreConfigDirty: boolean;
+  appstoreSelectedScopeAccountId: string | null;
+  appstoreAccountScopeByChannel: Record<string, string>;
   debugLoading: boolean;
   debugStatus: StatusSummary | null;
   debugHealth: HealthSnapshot | null;

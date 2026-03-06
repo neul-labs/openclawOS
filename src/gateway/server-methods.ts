@@ -82,6 +82,7 @@ const READ_METHODS = new Set([
   "apps.list",
   "apps.info",
   "apps.getConfig",
+  "apps.getUiManifest",
   "apps.status",
 ]);
 const WRITE_METHODS = new Set([
@@ -163,6 +164,9 @@ function authorizeGatewayMethod(method: string, client: GatewayRequestOptions["c
     method === "apps.uninstall" ||
     method === "apps.configure" ||
     method === "apps.setEnabled" ||
+    method === "apps.start" ||
+    method === "apps.stop" ||
+    method === "apps.restart" ||
     method === "cron.add" ||
     method === "cron.update" ||
     method === "cron.remove" ||

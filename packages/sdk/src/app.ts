@@ -140,7 +140,12 @@ export abstract class OpenClawApp {
 
   /** Register a channel */
   protected async registerChannel(config: ChannelConfig): Promise<string> {
-    const result = await this.kernel.registerCapability("channel", config);
+    const result = await this.kernel.registerCapability("channel", {
+      channelId: config.id,
+      // Keep legacy key for compatibility with older kernels.
+      id: config.id,
+      meta: config.meta,
+    });
     if (!result.granted) {
       throw new Error(`Channel registration denied: ${result.capabilityId}`);
     }
@@ -149,7 +154,13 @@ export abstract class OpenClawApp {
 
   /** Register a tool */
   protected async registerTool(tool: ToolDefinition): Promise<string> {
-    const result = await this.kernel.registerCapability("tool", tool);
+    const result = await this.kernel.registerCapability("tool", {
+      toolId: tool.name,
+      // Keep legacy keys for compatibility with older kernels.
+      name: tool.name,
+      description: tool.description,
+      parameters: tool.parameters,
+    });
     if (!result.granted) {
       throw new Error(`Tool registration denied: ${tool.name}`);
     }
@@ -164,7 +175,11 @@ export abstract class OpenClawApp {
     // Store handler locally
     this.gatewayMethodHandlers.set(method, handler);
 
-    const result = await this.kernel.registerCapability("gateway_method", { method });
+    const result = await this.kernel.registerCapability("gateway_method", {
+      methodName: method,
+      // Keep legacy key for compatibility with older kernels.
+      method,
+    });
     if (!result.granted) {
       throw new Error(`Gateway method registration denied: ${method}`);
     }
@@ -176,7 +191,11 @@ export abstract class OpenClawApp {
     // Store handler locally
     this.httpRouteHandlers.set(path, handler);
 
-    const result = await this.kernel.registerCapability("http_route", { path });
+    const result = await this.kernel.registerCapability("http_route", {
+      route: path,
+      // Keep legacy key for compatibility with older kernels.
+      path,
+    });
     if (!result.granted) {
       throw new Error(`HTTP route registration denied: ${path}`);
     }

@@ -38,7 +38,10 @@ export interface KernelClientOptions {
 }
 
 const DEFAULT_OPTIONS: Required<KernelClientOptions> = {
-  socketPath: process.env.OPENCLAW_KERNEL_SOCKET || "/tmp/openclawos/kernel.sock",
+  socketPath:
+    process.env.OPENCLAWOS_KERNEL_SOCKET ||
+    process.env.OPENCLAW_KERNEL_SOCKET ||
+    "/tmp/openclawos/kernel.sock",
   connectTimeout: 5000,
   requestTimeout: 30000,
   autoReconnect: true,
@@ -324,12 +327,20 @@ export class KernelClient extends EventEmitter<KernelClientEvents> {
   ): void {
     this.on("event", async (event) => {
       if (event.event === `hook:${hookName}`) {
-        const payload = event.payload as { eventId: string; data: T; context: unknown };
-        const result = await handler(payload.data, payload.context);
+        const payload = event.payload as
+          | { eventId?: string; data?: T; context?: unknown }
+          | undefined;
+        const eventId =
+          typeof payload?.eventId === "string" ? payload.eventId : crypto.randomUUID();
+        const data = Object.prototype.hasOwnProperty.call(payload ?? {}, "data")
+          ? (payload?.data as T)
+          : (event.payload as T);
+        const context = payload?.context ?? {};
+        const result = await handler(data, context);
 
         // If handler returns a value, send it as hook result
         if (result !== undefined) {
-          await this.sendHookResult(payload.eventId, result);
+          await this.sendHookResult(eventId, result);
         }
       }
     });

@@ -91,6 +91,7 @@ const validateTelegramCustomCommands = (
 
 export const TelegramAccountSchemaBase = z
   .object({
+    runtime: z.enum(["in-process", "ipc"]).optional(),
     name: z.string().optional(),
     capabilities: TelegramCapabilitiesSchema.optional(),
     markdown: MarkdownConfigSchema,
@@ -263,6 +264,7 @@ const DiscordUiSchema = z
 
 export const DiscordAccountSchema = z
   .object({
+    runtime: z.enum(["in-process", "ipc"]).optional(),
     name: z.string().optional(),
     capabilities: z.array(z.string()).optional(),
     markdown: MarkdownConfigSchema,
@@ -515,6 +517,7 @@ const SlackReplyToModeByChatTypeSchema = z
 
 export const SlackAccountSchema = z
   .object({
+    runtime: z.enum(["in-process", "ipc"]).optional(),
     name: z.string().optional(),
     mode: z.enum(["socket", "http"]).optional(),
     signingSecret: z.string().optional().register(sensitive),
@@ -634,6 +637,7 @@ export const SlackConfigSchema = SlackAccountSchema.safeExtend({
 
 export const SignalAccountSchemaBase = z
   .object({
+    runtime: z.enum(["in-process", "ipc"]).optional(),
     name: z.string().optional(),
     capabilities: z.array(z.string()).optional(),
     markdown: MarkdownConfigSchema,

@@ -10,10 +10,15 @@ type ConfigModelEntry = { id?: string; contextWindow?: number };
 type ProviderConfigEntry = { models?: ConfigModelEntry[] };
 type ModelsConfig = { providers?: Record<string, ProviderConfigEntry | undefined> };
 
+// Safety limit to prevent unbounded cache growth
+const MODEL_CACHE_MAX = 50;
+
 export function applyConfiguredContextWindows(params: {
   cache: Map<string, number>;
   modelsConfig: ModelsConfig | undefined;
+  maxSize?: number;
 }) {
+  const maxSize = params.maxSize ?? MODEL_CACHE_MAX;
   const providers = params.modelsConfig?.providers;
   if (!providers || typeof providers !== "object") {
     return;
@@ -28,6 +33,10 @@ export function applyConfiguredContextWindows(params: {
         typeof model?.contextWindow === "number" ? model.contextWindow : undefined;
       if (!modelId || !contextWindow || contextWindow <= 0) {
         continue;
+      }
+      // Clear cache if it exceeds max size (fast to rebuild)
+      if (params.cache.size >= maxSize) {
+        params.cache.clear();
       }
       params.cache.set(modelId, contextWindow);
     }
@@ -61,6 +70,10 @@ const loadPromise = (async () => {
         continue;
       }
       if (typeof m.contextWindow === "number" && m.contextWindow > 0) {
+        // Clear cache if it exceeds max size (fast to rebuild)
+        if (MODEL_CACHE.size >= MODEL_CACHE_MAX) {
+          MODEL_CACHE.clear();
+        }
         MODEL_CACHE.set(m.id, m.contextWindow);
       }
     }

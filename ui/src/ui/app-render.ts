@@ -10,7 +10,8 @@ import { loadAgentSkills } from "./controllers/agent-skills.ts";
 import { loadAgents } from "./controllers/agents.ts";
 import {
   loadPackages,
-  installPackage,
+  loadPackageDetails,
+  saveSelectedPackageConfig,
   uninstallPackage,
   setPackageEnabled,
   startPackage,
@@ -19,9 +20,12 @@ import {
   setFilter as setAppstoreFilter,
   setCategory as setAppstoreCategory,
   selectPackage,
+  updateConfigDraft,
+  resetConfigDraft,
   showInstallModal,
   cancelInstallModal,
   confirmInstall,
+  type AppStoreAccountScope,
 } from "./controllers/appstore.ts";
 import { loadChannels } from "./controllers/channels.ts";
 import { loadChatHistory } from "./controllers/chat.ts";
@@ -109,6 +113,27 @@ function resolveAssistantAvatarUrl(state: AppViewState): string | undefined {
     return candidate;
   }
   return identity?.avatarUrl;
+}
+
+export function resolveAppStoreScope(
+  state: AppViewState,
+  packageId: string,
+): AppStoreAccountScope | undefined {
+  const channelId = packageId.includes("/") ? packageId.split("/").at(-1) : null;
+  if (!channelId) {
+    return undefined;
+  }
+  const scopedAccountId = state.appstoreAccountScopeByChannel[channelId]?.trim();
+  if (scopedAccountId) {
+    return { accountId: scopedAccountId };
+  }
+  const defaultAccountId = state.channelsSnapshot?.channelDefaultAccountId?.[channelId]?.trim();
+  if (defaultAccountId) {
+    return { accountId: defaultAccountId };
+  }
+  const fallbackAccountId = state.channelsSnapshot?.channelAccounts?.[channelId]?.[0]?.accountId;
+  const accountId = fallbackAccountId?.trim();
+  return accountId ? { accountId } : undefined;
 }
 
 export function renderApp(state: AppViewState) {
@@ -262,33 +287,16 @@ export function renderApp(state: AppViewState) {
                 snapshot: state.channelsSnapshot,
                 lastError: state.channelsError,
                 lastSuccessAt: state.channelsLastSuccess,
-                whatsappMessage: state.whatsappLoginMessage,
-                whatsappQrDataUrl: state.whatsappLoginQrDataUrl,
-                whatsappConnected: state.whatsappLoginConnected,
-                whatsappBusy: state.whatsappBusy,
                 configSchema: state.configSchema,
                 configSchemaLoading: state.configSchemaLoading,
                 configForm: state.configForm,
                 configUiHints: state.configUiHints,
                 configSaving: state.configSaving,
                 configFormDirty: state.configFormDirty,
-                nostrProfileFormState: state.nostrProfileFormState,
-                nostrProfileAccountId: state.nostrProfileAccountId,
                 onRefresh: (probe) => loadChannels(state, probe),
-                onWhatsAppStart: (force) => state.handleWhatsAppStart(force),
-                onWhatsAppWait: () => state.handleWhatsAppWait(),
-                onWhatsAppLogout: () => state.handleWhatsAppLogout(),
                 onConfigPatch: (path, value) => updateConfigFormValue(state, path, value),
                 onConfigSave: () => state.handleChannelConfigSave(),
                 onConfigReload: () => state.handleChannelConfigReload(),
-                onNostrProfileEdit: (accountId, profile) =>
-                  state.handleNostrProfileEdit(accountId, profile),
-                onNostrProfileCancel: () => state.handleNostrProfileCancel(),
-                onNostrProfileFieldChange: (field, value) =>
-                  state.handleNostrProfileFieldChange(field, value),
-                onNostrProfileSave: () => state.handleNostrProfileSave(),
-                onNostrProfileImport: () => state.handleNostrProfileImport(),
-                onNostrProfileToggleAdvanced: () => state.handleNostrProfileToggleAdvanced(),
               })
             : nothing
         }
@@ -738,18 +746,80 @@ export function renderApp(state: AppViewState) {
                 busyKey: state.appstoreBusyKey,
                 messages: state.appstoreMessages,
                 installPending: state.appstoreInstallPending,
+                detailsLoading: state.appstoreDetailsLoading,
+                detailsError: state.appstoreDetailsError,
+                details: state.appstoreDetails,
+                configDraft: state.appstoreConfigDraft,
+                configDirty: state.appstoreConfigDirty,
+                selectedScopeAccountId: state.appstoreSelectedScopeAccountId,
+                channelAccounts: state.channelsSnapshot?.channelAccounts ?? {},
+                channelScopeById: state.appstoreAccountScopeByChannel,
                 onFilterChange: (next) => setAppstoreFilter(state, next),
                 onCategoryChange: (next) => setAppstoreCategory(state, next),
-                onSelect: (id) => selectPackage(state, id),
+                onSelect: (id) => {
+                  selectPackage(state, id);
+                  if (!id) {
+                    return;
+                  }
+                  const scope = resolveAppStoreScope(state, id);
+                  void loadPackageDetails(state, id, scope);
+                },
                 onShowInstallModal: (id) => showInstallModal(state, id),
-                onConfirmInstall: () => confirmInstall(state),
+                onConfirmInstall: () =>
+                  confirmInstall(
+                    state,
+                    state.appstoreInstallPending
+                      ? resolveAppStoreScope(state, state.appstoreInstallPending.id)
+                      : undefined,
+                  ),
                 onCancelInstall: () => cancelInstallModal(state),
-                onUninstall: (id) => uninstallPackage(state, id),
-                onToggleEnabled: (id, enabled) => setPackageEnabled(state, id, enabled),
-                onStart: (id) => startPackage(state, id),
-                onStop: (id) => stopPackage(state, id),
-                onRestart: (id) => restartPackage(state, id),
-                onRefresh: () => loadPackages(state, { clearMessages: true }),
+                onUninstall: (id) =>
+                  uninstallPackage(state, id, false, resolveAppStoreScope(state, id)),
+                onToggleEnabled: (id, enabled) =>
+                  setPackageEnabled(state, id, enabled, resolveAppStoreScope(state, id)),
+                onStart: (id) => startPackage(state, id, resolveAppStoreScope(state, id)),
+                onStop: (id) => stopPackage(state, id, resolveAppStoreScope(state, id)),
+                onRestart: (id) => restartPackage(state, id, resolveAppStoreScope(state, id)),
+                onRefresh: () =>
+                  loadPackages(state, {
+                    clearMessages: true,
+                    scope: state.appstoreSelectedId
+                      ? resolveAppStoreScope(state, state.appstoreSelectedId)
+                      : undefined,
+                  }),
+                onScopeChange: (channelId, accountId) => {
+                  const next = { ...state.appstoreAccountScopeByChannel };
+                  const scoped = accountId.trim();
+                  if (scoped) {
+                    next[channelId] = scoped;
+                  } else {
+                    delete next[channelId];
+                  }
+                  state.appstoreAccountScopeByChannel = next;
+
+                  const selectedId = state.appstoreSelectedId;
+                  if (!selectedId) {
+                    return;
+                  }
+                  const selectedChannel = selectedId.includes("/")
+                    ? selectedId.split("/").at(-1)
+                    : null;
+                  if (selectedChannel !== channelId) {
+                    return;
+                  }
+                  const scope = resolveAppStoreScope(state, selectedId);
+                  void loadPackageDetails(state, selectedId, scope);
+                  void loadPackages(state, { scope });
+                },
+                onConfigDraftChange: (draft) => updateConfigDraft(state, draft),
+                onConfigDraftReset: () => resetConfigDraft(state),
+                onConfigSave: () =>
+                  saveSelectedPackageConfig(
+                    state,
+                    state.appstoreSelectedId
+                      ? resolveAppStoreScope(state, state.appstoreSelectedId)
+                      : undefined,
+                  ),
               })
             : nothing
         }
@@ -942,12 +1012,31 @@ export function renderApp(state: AppViewState) {
                 onSectionChange: (section) => {
                   state.configActiveSection = section;
                   state.configActiveSubsection = null;
+                  // Load debug data when switching to developer section
+                  if (section === "developer") {
+                    void loadDebug(state);
+                  }
                 },
                 onSubsectionChange: (section) => (state.configActiveSubsection = section),
                 onReload: () => loadConfig(state),
                 onSave: () => saveConfig(state),
                 onApply: () => applyConfig(state),
                 onUpdate: () => runUpdate(state),
+                // Developer tools props
+                debugLoading: state.debugLoading,
+                debugStatus: state.debugStatus,
+                debugHealth: state.debugHealth,
+                debugModels: state.debugModels,
+                debugHeartbeat: state.debugHeartbeat,
+                debugEventLog: state.eventLog,
+                debugCallMethod: state.debugCallMethod,
+                debugCallParams: state.debugCallParams,
+                debugCallResult: state.debugCallResult,
+                debugCallError: state.debugCallError,
+                onDebugCallMethodChange: (next) => (state.debugCallMethod = next),
+                onDebugCallParamsChange: (next) => (state.debugCallParams = next),
+                onDebugRefresh: () => loadDebug(state),
+                onDebugCall: () => callDebugMethod(state),
               })
             : nothing
         }

@@ -10,6 +10,7 @@ import { hasWebCredsSync } from "./auth-store.js";
 export type ResolvedWhatsAppAccount = {
   accountId: string;
   name?: string;
+  runtime?: "in-process" | "ipc";
   enabled: boolean;
   sendReadReceipts: boolean;
   messagePrefix?: string;
@@ -140,7 +141,9 @@ export function resolveWhatsAppAccount(params: {
   const rootCfg = params.cfg.channels?.whatsapp;
   const accountId = params.accountId?.trim() || resolveDefaultWhatsAppAccountId(params.cfg);
   const accountCfg = resolveAccountConfig(params.cfg, accountId);
-  const enabled = accountCfg?.enabled !== false;
+  const baseEnabled = rootCfg?.enabled !== false;
+  const accountEnabled = accountCfg?.enabled !== false;
+  const enabled = baseEnabled && accountEnabled;
   const { authDir, isLegacy } = resolveWhatsAppAuthDir({
     cfg: params.cfg,
     accountId,
@@ -148,6 +151,7 @@ export function resolveWhatsAppAccount(params: {
   return {
     accountId,
     name: accountCfg?.name?.trim() || undefined,
+    runtime: accountCfg?.runtime ?? rootCfg?.runtime,
     enabled,
     sendReadReceipts: accountCfg?.sendReadReceipts ?? rootCfg?.sendReadReceipts ?? true,
     messagePrefix:

@@ -652,6 +652,30 @@ export function subscribeEmbeddedPiSession(params: SubscribeEmbeddedPiSessionPar
       }
     }
     sessionUnsubscribe();
+
+    // Clear accumulated buffers to release memory after run completes
+    assistantTexts.length = 0;
+    toolMetas.length = 0;
+    toolMetaById.clear();
+    toolSummaryById.clear();
+    messagingToolSentTexts.length = 0;
+    messagingToolSentTextsNormalized.length = 0;
+    messagingToolSentTargets.length = 0;
+    pendingMessagingTexts.clear();
+    pendingMessagingTargets.clear();
+    state.deltaBuffer = "";
+    state.blockBuffer = "";
+    state.lastStreamedAssistant = undefined;
+    state.lastStreamedAssistantCleaned = undefined;
+    state.lastStreamedReasoning = undefined;
+    state.lastBlockReplyText = undefined;
+    state.lastAssistantTextNormalized = undefined;
+    state.lastAssistantTextTrimmed = undefined;
+    state.lastReasoningSent = undefined;
+    state.lastAssistant = undefined;
+    blockChunker?.reset();
+    replyDirectiveAccumulator.reset();
+    partialReplyDirectiveAccumulator.reset();
   };
 
   return {

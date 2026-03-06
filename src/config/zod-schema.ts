@@ -335,6 +335,16 @@ export const OpenClawSchema = z
       .strict()
       .optional(),
     channels: ChannelsSchema,
+    apps: z
+      .record(
+        z.string(),
+        z
+          .object({
+            enabled: z.boolean().optional(),
+          })
+          .strict(),
+      )
+      .optional(),
     discovery: z
       .object({
         wideArea: z

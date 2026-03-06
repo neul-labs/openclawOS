@@ -108,6 +108,18 @@ describe("buildGatewayReloadPlan", () => {
     expect(plan.noopPaths).toContain("gateway.remote.url");
   });
 
+  it("treats apps config writes as no-op", () => {
+    const plan = buildGatewayReloadPlan(["apps.@openclawos/telegram.enabled"]);
+    expect(plan.restartGateway).toBe(false);
+    expect(plan.noopPaths).toContain("apps.@openclawos/telegram.enabled");
+  });
+
+  it("keeps non-channel apps config changes restart-scoped", () => {
+    const plan = buildGatewayReloadPlan(["apps.community-tool.enabled"]);
+    expect(plan.restartGateway).toBe(true);
+    expect(plan.noopPaths).not.toContain("apps.community-tool.enabled");
+  });
+
   it("defaults unknown paths to restart", () => {
     const plan = buildGatewayReloadPlan(["unknownField"]);
     expect(plan.restartGateway).toBe(true);

@@ -25,6 +25,12 @@ import {
   AppsSetEnabledParamsSchema,
   AppsSetEnabledResultSchema,
   type AppsSetEnabledResult,
+  type AppsLifecycleParams,
+  AppsLifecycleParamsSchema,
+  AppsLifecycleResultSchema,
+  type AppsLifecycleResult,
+  AppsGetUiManifestResultSchema,
+  type AppsGetUiManifestResult,
   type AppsStatusParams,
   AppsStatusParamsSchema,
   AppsStatusResultSchema,
@@ -303,6 +309,8 @@ export const validateAppsSetEnabledParams = ajv.compile<AppsSetEnabledParams>(
   AppsSetEnabledParamsSchema,
 );
 export const validateAppsStatusParams = ajv.compile<AppsStatusParams>(AppsStatusParamsSchema);
+export const validateAppsLifecycleParams =
+  ajv.compile<AppsLifecycleParams>(AppsLifecycleParamsSchema);
 export const validateNodePairRequestParams = ajv.compile<NodePairRequestParams>(
   NodePairRequestParamsSchema,
 );
@@ -468,6 +476,9 @@ export {
   AppsGetConfigResultSchema,
   AppsSetEnabledParamsSchema,
   AppsSetEnabledResultSchema,
+  AppsGetUiManifestResultSchema,
+  AppsLifecycleParamsSchema,
+  AppsLifecycleResultSchema,
   AppsStatusParamsSchema,
   AppsStatusResultSchema,
   PackageInfoSchema,
@@ -581,6 +592,9 @@ export type {
   AppsGetConfigResult,
   AppsSetEnabledParams,
   AppsSetEnabledResult,
+  AppsGetUiManifestResult,
+  AppsLifecycleParams,
+  AppsLifecycleResult,
   AppsStatusParams,
   AppsStatusResult,
   PackageInfo,

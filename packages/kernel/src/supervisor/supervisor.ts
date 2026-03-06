@@ -7,6 +7,7 @@
 import type { PackageManifest } from "@openclawos/protocol";
 import { fork, type ChildProcess } from "node:child_process";
 import { EventEmitter } from "node:events";
+import fs from "node:fs/promises";
 import path from "node:path";
 
 export interface SupervisorOptions {
@@ -79,10 +80,10 @@ export class AppSupervisor extends EventEmitter<SupervisorEvents> {
       throw new Error(`App ${appId} is already running`);
     }
 
-    // Resolve app directory and entry point
-    const appDirName = appId.replace(/^@/, "").replace("/", "-");
-    const appDir = path.join(this.options.appsDir, appDirName);
-    const entryPoint = path.join(appDir, manifest.main || "dist/index.js");
+    // Resolve app directory and entry point.
+    const mainFile = manifest.main || "dist/index.js";
+    const appDir = await this.resolveAppDir(appId, mainFile);
+    const entryPoint = path.join(appDir, mainFile);
 
     // Build process config
     const processConfig: AppProcessConfig = {
@@ -264,6 +265,8 @@ export class AppSupervisor extends EventEmitter<SupervisorEvents> {
 
     // Include OpenClawOS system vars
     env.OPENCLAWOS_KERNEL_SOCKET = this.options.socketPath;
+    // Backward compatibility for older SDK clients.
+    env.OPENCLAW_KERNEL_SOCKET = this.options.socketPath;
     env.OPENCLAWOS_APP_ID = manifest.id;
 
     // Only include env vars explicitly declared in manifest
@@ -306,6 +309,69 @@ export class AppSupervisor extends EventEmitter<SupervisorEvents> {
     child.on("exit", (code, signal) => {
       void this.handleExit(app, code, signal);
     });
+  }
+
+  private async resolveAppDir(appId: string, mainFile: string): Promise<string> {
+    const unscopedName = appId.includes("/") ? appId.split("/").at(-1) || appId : appId;
+    const candidates = Array.from(
+      new Set([
+        path.join(this.options.appsDir, appId),
+        path.join(this.options.appsDir, appId.replace(/^@/, "").replace("/", "-")),
+        path.join(this.options.appsDir, appId.replace(/^@openclawos\//, "")),
+        path.join(this.options.appsDir, unscopedName),
+      ]),
+    );
+
+    // Prefer exact manifest ID matches.
+    for (const dir of candidates) {
+      if (await this.hasMatchingManifest(dir, appId)) {
+        return dir;
+      }
+    }
+
+    // Fall back to directories that contain the configured entrypoint.
+    for (const dir of candidates) {
+      if (await this.pathExists(path.join(dir, mainFile))) {
+        return dir;
+      }
+    }
+
+    // Last resort: scan appsDir for a manifest with matching ID.
+    try {
+      const entries = await fs.readdir(this.options.appsDir, { withFileTypes: true });
+      for (const entry of entries) {
+        if (!entry.isDirectory()) {
+          continue;
+        }
+        const dir = path.join(this.options.appsDir, entry.name);
+        if (await this.hasMatchingManifest(dir, appId)) {
+          return dir;
+        }
+      }
+    } catch {
+      // Ignore directory read failures; we'll throw a clear error below.
+    }
+
+    throw new Error(`App directory not found for ${appId}`);
+  }
+
+  private async hasMatchingManifest(dir: string, appId: string): Promise<boolean> {
+    try {
+      const raw = await fs.readFile(path.join(dir, "openclawos.manifest.json"), "utf-8");
+      const parsed = JSON.parse(raw) as { id?: unknown };
+      return parsed.id === appId;
+    } catch {
+      return false;
+    }
+  }
+
+  private async pathExists(target: string): Promise<boolean> {
+    try {
+      await fs.access(target);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   private async handleExit(

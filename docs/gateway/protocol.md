@@ -214,6 +214,29 @@ The Gateway treats these as **claims** and enforces server-side allowlists.
 - Clients may optionally pin the gateway cert fingerprint (see `gateway.tls`
   config plus `gateway.remote.tlsFingerprint` or CLI `--tls-fingerprint`).
 
+## App Store account scope
+
+For channel-backed apps (for example `@openclawos/telegram`), `apps.*` methods
+support optional `accountId` scoping.
+
+- Read methods:
+  - `apps.list`
+  - `apps.info`
+  - `apps.getConfig`
+  - `apps.status`
+- Write and lifecycle methods:
+  - `apps.install`
+  - `apps.uninstall`
+  - `apps.configure`
+  - `apps.setEnabled`
+  - `apps.start`
+  - `apps.stop`
+  - `apps.restart`
+
+When `accountId` is provided, the gateway resolves runtime and enabled state
+for that account and applies writes to that account config in `channels.<id>`.
+When omitted, the default channel account is used.
+
 ## Scope
 
 This protocol exposes the **full gateway API** (status, channels, models, chat,
