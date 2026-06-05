@@ -193,7 +193,7 @@ The kernel reads configuration from:
   },
   "agents": {
     "default": {
-      "model": "claude-3-opus",
+      "model": "claude-opus-4-6",
       "systemPrompt": "..."
     }
   },

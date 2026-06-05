@@ -1,133 +1,156 @@
 # Skill Examples
 
-Example skill implementations.
+Example skill implementations using `OpenClawSkill` from `@openclawos/sdk`.
+The runtime executes `setup(ctx)` once, then calls `getTools()` and invokes
+each `SkillTool.execute(params, toolCtx)` per tool call.
+
+The skills shipped in this repo under `skills/` (for example
+`skills/coding-agent`, `skills/canvas`, `skills/memory-core` via the
+`memory-core` extension) follow the same shape.
 
 ## Time & Date Skill
 
 ```typescript
-import type { SkillPlugin } from "@openclawos/plugin-sdk";
+import { OpenClawSkill, toolSuccess, toolError } from "@openclawos/sdk";
+import type { PackageManifest, SkillContext, SkillTool } from "@openclawos/sdk";
 
-export default {
-  name: "time-utils",
+export default class TimeSkill extends OpenClawSkill {
+  manifest: PackageManifest = {
+    id: "@myorg/time-utils",
+    name: "Time Utilities",
+    version: "1.0.0",
+    type: "skill",
+    main: "dist/index.js",
+    protocol: { version: "1.0" },
+    capabilities: { tools: { provides: ["current_time", "parse_date"] } },
+  };
 
-  tools: [
-    {
-      name: "current_time",
-      description: "Get the current date and time",
-      parameters: {
-        type: "object",
-        properties: {
-          timezone: {
-            type: "string",
-            description: "Timezone (e.g., 'America/New_York')",
+  async setup(_ctx: SkillContext): Promise<void> {}
+
+  getTools(): SkillTool[] {
+    return [
+      {
+        name: "current_time",
+        description: "Get the current date and time",
+        parameters: {
+          type: "object",
+          properties: {
+            timezone: {
+              type: "string",
+              description: "IANA timezone, e.g. 'America/New_York'",
+            },
           },
         },
-      },
-      handler: async ({ timezone }) => {
-        const now = new Date();
-        const options: Intl.DateTimeFormatOptions = {
-          timeZone: timezone || "UTC",
-          dateStyle: "full",
-          timeStyle: "long",
-        };
-        return {
-          formatted: now.toLocaleString("en-US", options),
-          iso: now.toISOString(),
-          timestamp: now.getTime(),
-        };
-      },
-    },
-
-    {
-      name: "parse_date",
-      description: "Parse a natural language date",
-      parameters: {
-        type: "object",
-        properties: {
-          text: {
-            type: "string",
-            description: "Date text to parse",
-          },
+        execute: async (params) => {
+          const tz = (params.timezone as string) || "UTC";
+          const now = new Date();
+          return toolSuccess({
+            formatted: now.toLocaleString("en-US", {
+              timeZone: tz,
+              dateStyle: "full",
+              timeStyle: "long",
+            }),
+            iso: now.toISOString(),
+            timestamp: now.getTime(),
+          });
         },
-        required: ["text"],
       },
-      handler: async ({ text }) => {
-        // Simple parsing (use a library like chrono-node in production)
-        const date = new Date(text);
-        if (isNaN(date.getTime())) {
-          return { error: "Could not parse date" };
-        }
-        return {
-          iso: date.toISOString(),
-          formatted: date.toLocaleDateString("en-US", {
-            dateStyle: "full",
-          }),
-        };
+      {
+        name: "parse_date",
+        description: "Parse a date string",
+        parameters: {
+          type: "object",
+          properties: {
+            text: { type: "string", description: "Date text to parse" },
+          },
+          required: ["text"],
+        },
+        execute: async (params) => {
+          const text = String(params.text ?? "");
+          const date = new Date(text);
+          if (isNaN(date.getTime())) return toolError("Could not parse date");
+          return toolSuccess({
+            iso: date.toISOString(),
+            formatted: date.toLocaleDateString("en-US", { dateStyle: "full" }),
+          });
+        },
       },
-    },
-  ],
-} satisfies SkillPlugin;
+    ];
+  }
+}
 ```
 
 ## JSON Utilities Skill
 
 ```typescript
-import type { SkillPlugin } from "@openclawos/plugin-sdk";
+import { OpenClawSkill, toolSuccess, toolError } from "@openclawos/sdk";
+import type { PackageManifest, SkillContext, SkillTool } from "@openclawos/sdk";
 
-export default {
-  name: "json-utils",
+export default class JsonSkill extends OpenClawSkill {
+  manifest: PackageManifest = {
+    id: "@myorg/json-utils",
+    name: "JSON Utilities",
+    version: "1.0.0",
+    type: "skill",
+    main: "dist/index.js",
+    protocol: { version: "1.0" },
+    capabilities: { tools: { provides: ["json_parse", "json_query"] } },
+  };
 
-  tools: [
-    {
-      name: "json_parse",
-      description: "Parse and validate JSON",
-      parameters: {
-        type: "object",
-        properties: {
-          json: { type: "string", description: "JSON string to parse" },
+  async setup(_ctx: SkillContext): Promise<void> {}
+
+  getTools(): SkillTool[] {
+    return [
+      {
+        name: "json_parse",
+        description: "Parse and validate JSON",
+        parameters: {
+          type: "object",
+          properties: {
+            json: { type: "string", description: "JSON string to parse" },
+          },
+          required: ["json"],
         },
-        required: ["json"],
-      },
-      handler: async ({ json }) => {
-        try {
-          const parsed = JSON.parse(json);
-          return {
-            valid: true,
-            data: parsed,
-            type: Array.isArray(parsed) ? "array" : typeof parsed,
-          };
-        } catch (e) {
-          return {
-            valid: false,
-            error: e.message,
-          };
-        }
-      },
-    },
-
-    {
-      name: "json_query",
-      description: "Query JSON with a path expression",
-      parameters: {
-        type: "object",
-        properties: {
-          json: { type: "string", description: "JSON string" },
-          path: { type: "string", description: "Path like 'users[0].name'" },
+        execute: async (params) => {
+          try {
+            const parsed = JSON.parse(String(params.json));
+            return toolSuccess({
+              valid: true,
+              data: parsed,
+              type: Array.isArray(parsed) ? "array" : typeof parsed,
+            });
+          } catch (e) {
+            return toolError((e as Error).message);
+          }
         },
-        required: ["json", "path"],
       },
-      handler: async ({ json, path }) => {
-        try {
-          const data = JSON.parse(json);
-          const value = getByPath(data, path);
-          return { value };
-        } catch (e) {
-          return { error: e.message };
-        }
+      {
+        name: "json_query",
+        description: "Read a value from a JSON document by dotted path",
+        parameters: {
+          type: "object",
+          properties: {
+            json: { type: "string", description: "JSON string" },
+            path: {
+              type: "string",
+              description: "Dotted path, e.g. 'users[0].name'",
+            },
+          },
+          required: ["json", "path"],
+        },
+        execute: async (params) => {
+          try {
+            const data = JSON.parse(String(params.json));
+            const value = getByPath(data, String(params.path));
+            return toolSuccess({ value });
+          } catch (e) {
+            return toolError((e as Error).message);
+          }
+        },
       },
-    },
-  ],
-} satisfies SkillPlugin;
+    ];
+  }
+}
 
 function getByPath(obj: unknown, path: string): unknown {
   const parts = path.split(/[\.\[\]]/).filter(Boolean);
@@ -143,127 +166,140 @@ function getByPath(obj: unknown, path: string): unknown {
 ## Web Search Skill
 
 ```typescript
-import type { SkillPlugin } from "@openclawos/plugin-sdk";
+import { OpenClawSkill, toolSuccess, toolError } from "@openclawos/sdk";
+import type { PackageManifest, SkillContext, SkillTool } from "@openclawos/sdk";
 
-export default {
-  name: "web-search",
+interface SearchConfig {
+  searchEndpoint: string;
+  apiKey: string;
+}
 
-  tools: [
-    {
-      name: "web_search",
-      description: "Search the web for information",
-      parameters: {
-        type: "object",
-        properties: {
-          query: {
-            type: "string",
-            description: "Search query",
+export default class WebSearchSkill extends OpenClawSkill {
+  manifest: PackageManifest = {
+    id: "@myorg/web-search",
+    name: "Web Search",
+    version: "1.0.0",
+    type: "skill",
+    main: "dist/index.js",
+    protocol: { version: "1.0" },
+    capabilities: { tools: { provides: ["web_search"] } },
+  };
+
+  private cfg!: SearchConfig;
+
+  async setup(ctx: SkillContext): Promise<void> {
+    this.cfg = (ctx.config ?? {}) as SearchConfig;
+  }
+
+  getTools(): SkillTool[] {
+    return [
+      {
+        name: "web_search",
+        description: "Search the web for information",
+        parameters: {
+          type: "object",
+          properties: {
+            query: { type: "string", description: "Search query" },
+            limit: {
+              type: "integer",
+              description: "Maximum results",
+              default: 5,
+            },
           },
-          limit: {
-            type: "integer",
-            description: "Maximum results",
-            default: 5,
-          },
+          required: ["query"],
         },
-        required: ["query"],
+        execute: async (params, toolCtx) => {
+          const query = String(params.query);
+          const limit = Number(params.limit ?? 5);
+          const url = `${this.cfg.searchEndpoint}?q=${encodeURIComponent(query)}&limit=${limit}`;
+
+          const response = await fetch(url, {
+            headers: { Authorization: `Bearer ${this.cfg.apiKey}` },
+            signal: toolCtx.signal,
+          });
+          if (!response.ok) {
+            return toolError(`Search failed: ${response.status}`);
+          }
+          const data = (await response.json()) as {
+            results: Array<{ title: string; url: string; snippet: string }>;
+          };
+          return toolSuccess({
+            results: data.results.map((r) => ({
+              title: r.title,
+              url: r.url,
+              snippet: r.snippet,
+            })),
+          });
+        },
       },
-      handler: async ({ query, limit = 5 }, ctx) => {
-        const endpoint = ctx.config.searchEndpoint;
-        const apiKey = ctx.config.apiKey;
-
-        const response = await fetch(`${endpoint}?q=${encodeURIComponent(query)}&limit=${limit}`, {
-          headers: { Authorization: `Bearer ${apiKey}` },
-        });
-
-        if (!response.ok) {
-          return { error: `Search failed: ${response.status}` };
-        }
-
-        const data = await response.json();
-        return {
-          results: data.results.map((r: any) => ({
-            title: r.title,
-            url: r.url,
-            snippet: r.snippet,
-          })),
-        };
-      },
-    },
-  ],
-} satisfies SkillPlugin;
+    ];
+  }
+}
 ```
 
-## Memory Enhancement Skill
+## Tags Skill (using `dataDir`)
 
 ```typescript
-import type { SkillPlugin } from "@openclawos/plugin-sdk";
+import path from "node:path";
+import fs from "node:fs/promises";
+import { OpenClawSkill, toolSuccess } from "@openclawos/sdk";
+import type { PackageManifest, SkillContext, SkillTool } from "@openclawos/sdk";
 
-export default {
-  name: "memory-enhanced",
+export default class TagsSkill extends OpenClawSkill {
+  manifest: PackageManifest = {
+    id: "@myorg/tags",
+    name: "Tags",
+    version: "1.0.0",
+    type: "skill",
+    main: "dist/index.js",
+    protocol: { version: "1.0" },
+    capabilities: { tools: { provides: ["tag", "list_tags"] } },
+  };
 
-  tools: [
-    {
-      name: "remember",
-      description: "Store information in long-term memory",
-      parameters: {
-        type: "object",
-        properties: {
-          content: {
-            type: "string",
-            description: "Information to remember",
-          },
-          tags: {
-            type: "array",
-            items: { type: "string" },
-            description: "Tags for categorization",
-          },
+  private file!: string;
+
+  async setup(ctx: SkillContext): Promise<void> {
+    await fs.mkdir(ctx.dataDir, { recursive: true });
+    this.file = path.join(ctx.dataDir, "tags.json");
+  }
+
+  private async load(): Promise<string[]> {
+    try {
+      return JSON.parse(await fs.readFile(this.file, "utf8")) as string[];
+    } catch {
+      return [];
+    }
+  }
+
+  private async save(tags: string[]): Promise<void> {
+    await fs.writeFile(this.file, JSON.stringify(tags));
+  }
+
+  getTools(): SkillTool[] {
+    return [
+      {
+        name: "tag",
+        description: "Add a tag",
+        parameters: {
+          type: "object",
+          properties: { tag: { type: "string" } },
+          required: ["tag"],
         },
-        required: ["content"],
-      },
-      handler: async ({ content, tags }, ctx) => {
-        const taggedContent = tags?.length ? `[${tags.join(", ")}] ${content}` : content;
-
-        await ctx.memory.store(taggedContent);
-
-        return {
-          stored: true,
-          content: taggedContent,
-        };
-      },
-    },
-
-    {
-      name: "recall",
-      description: "Recall information from memory",
-      parameters: {
-        type: "object",
-        properties: {
-          query: {
-            type: "string",
-            description: "What to recall",
-          },
-          limit: {
-            type: "integer",
-            default: 5,
-          },
+        execute: async (params) => {
+          const tags = new Set(await this.load());
+          tags.add(String(params.tag));
+          await this.save([...tags]);
+          return toolSuccess({ count: tags.size });
         },
-        required: ["query"],
       },
-      handler: async ({ query, limit = 5 }, ctx) => {
-        const memories = await ctx.memory.search(query, { limit });
-
-        return {
-          found: memories.length,
-          memories: memories.map((m) => ({
-            content: m.content,
-            relevance: m.score,
-            timestamp: m.timestamp,
-          })),
-        };
+      {
+        name: "list_tags",
+        description: "List all tags",
+        execute: async () => toolSuccess({ tags: await this.load() }),
       },
-    },
-  ],
-} satisfies SkillPlugin;
+    ];
+  }
+}
 ```
 
 ## Using Skills
@@ -284,3 +320,4 @@ Enable in agent configuration:
 
 - [Skill Structure](skill-structure.md)
 - [Testing](../developing-apps/testing.md)
+- [SDK Reference](../sdk/index.md)

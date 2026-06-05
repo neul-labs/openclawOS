@@ -62,99 +62,99 @@ my-skill/
 
 ```typescript
 // src/index.ts
-import { SkillPlugin } from "@openclawos/plugin-sdk";
+import { OpenClawSkill, toolSuccess, toolError } from "@openclawos/sdk";
+import type { PackageManifest, SkillContext, SkillTool } from "@openclawos/sdk";
 
-export default {
-  name: "my-skill",
+export default class MySkill extends OpenClawSkill {
+  manifest: PackageManifest = {
+    id: "@myorg/my-skill",
+    name: "My Skill",
+    version: "1.0.0",
+    type: "skill",
+    main: "dist/index.js",
+    protocol: { version: "1.0" },
+    capabilities: { tools: { provides: ["my_tool"] } },
+  };
 
-  tools: [
-    {
-      name: "my_tool",
-      description: "Does something useful",
-      parameters: {
-        type: "object",
-        properties: {
-          input: { type: "string" },
+  async setup(ctx: SkillContext): Promise<void> {
+    this.ctx = ctx;
+  }
+
+  getTools(): SkillTool[] {
+    return [
+      {
+        name: "my_tool",
+        description: "Does something useful",
+        parameters: {
+          input: { type: "string", description: "The input value" },
         },
-        required: ["input"],
+        execute: async (params, toolCtx) => {
+          try {
+            const result = processInput(String(params.input));
+            return toolSuccess({ result });
+          } catch (err) {
+            return toolError((err as Error).message);
+          }
+        },
       },
-      handler: async (params, context) => {
-        // Access agent context
-        const { session, memory } = context;
-
-        // Do work
-        const result = processInput(params.input);
-
-        return { result };
-      },
-    },
-  ],
-} satisfies SkillPlugin;
+    ];
+  }
+}
 ```
 
 ## Skill Context
 
-Skills receive rich context:
+`SkillContext` is passed to `setup()` and exposes kernel services available to
+in-process skills (data directory, logger, session/memory access, etc.). See
+the [SDK Reference](../sdk/index.md) for the full type and helpers
+(`toolSuccess`, `toolError`, `validateToolParams`).
 
-```typescript
-interface SkillContext {
-  /** Current session */
-  session: {
-    key: string;
-    agentId: string;
-    messageCount: number;
-  };
-
-  /** Memory access */
-  memory: {
-    search: (query: string) => Promise<Memory[]>;
-    store: (content: string) => Promise<void>;
-  };
-
-  /** Agent state */
-  agent: {
-    currentTurn: number;
-    tokenUsage: number;
-  };
-
-  /** Logging */
-  log: Logger;
-}
-```
+Per-call context is `ToolContext`, passed as the second argument to `execute`:
+session identifiers, an abort signal, and a tool-scoped logger.
 
 ## Example: Custom Calculator
 
 ```typescript
-export default {
-  name: "calculator",
+import { OpenClawSkill, toolSuccess, toolError } from "@openclawos/sdk";
+import type { PackageManifest, SkillContext, SkillTool } from "@openclawos/sdk";
 
-  tools: [
-    {
-      name: "calculate",
-      description: "Perform mathematical calculations",
-      parameters: {
-        type: "object",
-        properties: {
+export default class CalculatorSkill extends OpenClawSkill {
+  manifest: PackageManifest = {
+    id: "@myorg/calculator",
+    name: "Calculator",
+    version: "1.0.0",
+    type: "skill",
+    main: "dist/index.js",
+    protocol: { version: "1.0" },
+    capabilities: { tools: { provides: ["calculate"] } },
+  };
+
+  async setup(_ctx: SkillContext): Promise<void> {}
+
+  getTools(): SkillTool[] {
+    return [
+      {
+        name: "calculate",
+        description: "Perform mathematical calculations",
+        parameters: {
           expression: {
             type: "string",
             description: "Math expression to evaluate",
           },
         },
-        required: ["expression"],
+        execute: async ({ expression }, ctx) => {
+          try {
+            const result = evaluateMathExpression(String(expression));
+            return toolSuccess({ result, expression });
+          } catch (error) {
+            ctx.log.error("Calculation failed", { error });
+            return toolError((error as Error).message);
+          }
+        },
       },
-      handler: async ({ expression }, ctx) => {
-        try {
-          // Safe eval (use a proper math parser in production)
-          const result = evaluateMathExpression(expression);
-          return { result, expression };
-        } catch (error) {
-          ctx.log.error("Calculation failed:", error);
-          return { error: error.message };
-        }
-      },
-    },
-  ],
-};
+    ];
+  }
+}
 ```
 
 ## Enabling Skills

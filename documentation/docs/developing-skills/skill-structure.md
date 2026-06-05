@@ -1,6 +1,8 @@
 # Skill Structure
 
-Detailed reference for skill package structure.
+Detailed reference for skill package structure. Skills are in-process tools
+loaded by the agent runtime; the SDK base class is `OpenClawSkill` from
+`@openclawos/sdk`.
 
 ## Directory Layout
 
@@ -10,7 +12,7 @@ my-skill/
 ├── package.json               # Node.js package
 ├── tsconfig.json              # TypeScript config
 ├── src/
-│   ├── index.ts              # Main export
+│   ├── index.ts              # Main export (default-exported class)
 │   ├── tools/                # Tool implementations
 │   │   ├── tool-a.ts
 │   │   └── tool-b.ts
@@ -41,107 +43,131 @@ my-skill/
 }
 ```
 
+See the [Manifest Schema](../reference/manifest-schema.md) for the complete
+field reference (it is enforced by `@openclawos/protocol`).
+
 ## Main Export
 
 ```typescript
 // src/index.ts
-import type { SkillPlugin, ToolDefinition } from "@openclawos/plugin-sdk";
-import { toolA } from "./tools/tool-a";
-import { toolB } from "./tools/tool-b";
+import { OpenClawSkill } from "@openclawos/sdk";
+import type { PackageManifest, SkillContext, SkillTool } from "@openclawos/sdk";
+import { toolA } from "./tools/tool-a.js";
+import { toolB } from "./tools/tool-b.js";
 
-const skill: SkillPlugin = {
-  name: "my-skill",
-  tools: [toolA, toolB],
+export default class MySkill extends OpenClawSkill {
+  manifest: PackageManifest = {
+    id: "@myorg/my-skill",
+    name: "My Skill",
+    version: "1.0.0",
+    type: "skill",
+    main: "dist/index.js",
+    protocol: { version: "1.0" },
+    capabilities: { tools: { provides: ["tool_a", "tool_b"] } },
+  };
 
-  // Optional lifecycle hooks
-  onLoad: async (ctx) => {
-    ctx.log.info("Skill loaded");
-  },
+  private ctx!: SkillContext;
 
-  onUnload: async (ctx) => {
-    ctx.log.info("Skill unloading");
-  },
-};
+  async setup(ctx: SkillContext): Promise<void> {
+    this.ctx = ctx;
+    ctx.logger.info("Skill loaded");
+  }
 
-export default skill;
+  async teardown(): Promise<void> {
+    this.ctx?.logger.info("Skill unloading");
+  }
+
+  getTools(): SkillTool[] {
+    return [toolA, toolB];
+  }
+}
 ```
 
 ## Tool Definition
 
 ```typescript
 // src/tools/tool-a.ts
-import type { ToolDefinition, ToolHandler } from "@openclawos/plugin-sdk";
+import { toolSuccess, toolError } from "@openclawos/sdk";
+import type { SkillTool } from "@openclawos/sdk";
 
-const handler: ToolHandler = async (params, context) => {
-  const { input } = params as { input: string };
-
-  // Use context
-  context.log.debug("Processing:", input);
-
-  // Return result
-  return {
-    processed: input.toUpperCase(),
-    timestamp: Date.now(),
-  };
-};
-
-export const toolA: ToolDefinition = {
+export const toolA: SkillTool = {
   name: "tool_a",
   description: "Processes input text",
   parameters: {
     type: "object",
     properties: {
-      input: {
-        type: "string",
-        description: "Text to process",
-      },
+      input: { type: "string", description: "Text to process" },
     },
     required: ["input"],
   },
-  handler,
+  execute: async (params, ctx) => {
+    const input = String(params.input ?? "");
+    if (!input) return toolError("input is required");
+
+    return toolSuccess({
+      processed: input.toUpperCase(),
+      timestamp: Date.now(),
+    });
+  },
 };
 ```
 
-## Plugin Interface
+## Skill Interface
+
+`OpenClawSkill` is an abstract class. Concrete skills implement:
+
+| Member              | Required | Purpose                                                    |
+| ------------------- | -------- | ---------------------------------------------------------- |
+| `manifest`          | yes      | `PackageManifest` for the package                          |
+| `setup(ctx)`        | yes      | Called once when the agent runtime loads the skill         |
+| `getTools()`        | yes      | Returns the `SkillTool[]` exposed by this skill            |
+| `teardown()`        | no       | Called when the skill is unloaded                          |
+
+## SkillContext
+
+`SkillContext` is passed to `setup()`:
 
 ```typescript
-interface SkillPlugin {
-  /** Skill name */
-  name: string;
-
-  /** Tools provided by this skill */
-  tools: ToolDefinition[];
-
-  /** Called when skill is loaded */
-  onLoad?: (context: SkillContext) => Promise<void>;
-
-  /** Called when skill is unloaded */
-  onUnload?: (context: SkillContext) => Promise<void>;
+interface SkillContext {
+  /** Skill's data directory for persistence */
+  dataDir: string;
+  /** Workspace directory (user's project) */
+  workspaceDir?: string;
+  /** Current agent ID */
+  agentId?: string;
+  /** Current session key */
+  sessionKey?: string;
+  /** OpenClawOS configuration */
+  config: unknown;
+  /** Logger for the skill */
+  logger: SkillLogger;
 }
 ```
 
-## Tool Handler
+## Tool Executor
 
 ```typescript
-type ToolHandler = (params: unknown, context: ToolContext) => Promise<unknown>;
+type ToolExecutor = (
+  params: Record<string, unknown>,
+  context: ToolContext,
+) => Promise<ToolResult>;
 
 interface ToolContext {
-  /** Session info */
-  session: SessionInfo;
-
-  /** Memory access */
-  memory: MemoryAccess;
-
-  /** Agent info */
-  agent: AgentInfo;
-
-  /** Logger */
-  log: Logger;
-
-  /** Configuration */
-  config: SkillConfig;
+  agentId?: string;
+  sessionKey?: string;
+  workspaceDir?: string;
+  sandboxed?: boolean;
+  signal?: AbortSignal; // honour this for long-running work
 }
+
+type ToolResult =
+  | { success: true; output: unknown }
+  | { success: false; error: string };
 ```
+
+Use the helpers `toolSuccess(output)` and `toolError(message)` to build
+`ToolResult` values. `validateToolParams(params, schema)` performs the same
+required/type checks the runtime would perform itself.
 
 ## Package.json
 
@@ -157,7 +183,7 @@ interface ToolContext {
     "dev": "tsc --watch"
   },
   "dependencies": {
-    "@openclawos/plugin-sdk": "^1.0.0"
+    "@openclawos/sdk": "^1.0.0"
   },
   "devDependencies": {
     "typescript": "^5.0.0"
@@ -182,49 +208,28 @@ interface ToolContext {
 }
 ```
 
-## Accessing Memory
+## Persistence
+
+Skills get a private `dataDir` from `SkillContext`. Use it for SQLite files,
+caches, vector indexes, or anything else the skill owns. Do not write outside
+`dataDir` unless you are intentionally operating on `workspaceDir`.
 
 ```typescript
-const handler: ToolHandler = async (params, ctx) => {
-  // Search memories
-  const memories = await ctx.memory.search("relevant topic");
-
-  // Store new memory
-  await ctx.memory.store("Important information to remember");
-
-  // Use in response
-  return {
-    relatedMemories: memories.map((m) => m.content),
-  };
-};
-```
-
-## Configuration
-
-Skills can have configuration:
-
-```json
-{
-  "capabilities": {
-    "tools": { "provides": ["my_tool"] }
-  },
-  "configSchema": {
-    "type": "object",
-    "properties": {
-      "apiEndpoint": { "type": "string" },
-      "maxResults": { "type": "integer", "default": 10 }
-    }
-  }
+async setup(ctx: SkillContext): Promise<void> {
+  this.dbPath = path.join(ctx.dataDir, "memory.sqlite");
+  await fs.mkdir(ctx.dataDir, { recursive: true });
 }
 ```
 
-Accessing config:
+## Cancellation
+
+Long-running tools should honour `ToolContext.signal`:
 
 ```typescript
-const handler: ToolHandler = async (params, ctx) => {
-  const endpoint = ctx.config.apiEndpoint;
-  const maxResults = ctx.config.maxResults ?? 10;
-  // ...
+execute: async (params, ctx) => {
+  const res = await fetch(url, { signal: ctx.signal });
+  if (ctx.signal?.aborted) return toolError("cancelled");
+  return toolSuccess(await res.json());
 };
 ```
 
@@ -232,3 +237,4 @@ const handler: ToolHandler = async (params, ctx) => {
 
 - [Examples](examples.md)
 - [Testing](../developing-apps/testing.md)
+- [SDK Reference](../sdk/index.md)

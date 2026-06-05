@@ -115,5 +115,5 @@ OpenClawOS supports a wide range of messaging platforms:
 
 OpenClawOS is open source. Contributions are welcome!
 
-- [GitHub Repository](https://github.com/openclaw/openclaw)
-- [Issue Tracker](https://github.com/openclaw/openclaw/issues)
+- [GitHub Repository](https://github.com/neul-labs/openclawOS)
+- [Issue Tracker](https://github.com/neul-labs/openclawOS/issues)

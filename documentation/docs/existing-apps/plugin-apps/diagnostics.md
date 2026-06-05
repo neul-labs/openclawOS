@@ -26,7 +26,7 @@ openclaw apps install @openclawos/diagnostics
   "apps": {
     "@openclawos/diagnostics": {
       "enabled": true,
-      "endpoint": "http://localhost:4318"
+      "otlpEndpoint": "http://localhost:4318"
     }
   }
 }
@@ -47,7 +47,7 @@ openclaw gateway
   "apps": {
     "@openclawos/diagnostics": {
       "enabled": true,
-      "endpoint": "http://localhost:4318"
+      "otlpEndpoint": "http://localhost:4318"
     }
   }
 }
@@ -60,7 +60,7 @@ openclaw gateway
   "apps": {
     "@openclawos/diagnostics": {
       "enabled": true,
-      "endpoint": "http://localhost:4318",
+      "otlpEndpoint": "http://localhost:4318",
       "serviceName": "openclawos",
       "metrics": {
         "enabled": true,
@@ -80,7 +80,7 @@ openclaw gateway
 
 | Option              | Type    | Description                |
 | ------------------- | ------- | -------------------------- |
-| `endpoint`          | string  | OTLP endpoint URL          |
+| `otlpEndpoint`      | string  | OTLP endpoint URL          |
 | `serviceName`       | string  | Service name for telemetry |
 | `metrics.enabled`   | boolean | Enable metrics export      |
 | `metrics.interval`  | number  | Export interval (ms)       |

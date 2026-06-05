@@ -37,8 +37,8 @@ my-agent/
       "systemPromptFile": "prompts/system.md",
       "skills": ["coding", "memory"],
       "model": {
-        "default": "claude-3-opus",
-        "fallback": ["claude-3-sonnet"]
+        "default": "claude-opus-4-6",
+        "fallback": ["claude-sonnet-4-6"]
       },
       "behavior": {
         "compaction": "balanced",
@@ -123,8 +123,8 @@ Enable built-in or custom skills:
   "capabilities": {
     "agent": {
       "model": {
-        "default": "claude-3-opus",
-        "fallback": ["claude-3-sonnet", "gpt-4"]
+        "default": "claude-opus-4-6",
+        "fallback": ["claude-sonnet-4-6", "gpt-4"]
       }
     }
   }
@@ -203,4 +203,7 @@ openclaw chat --agent @myorg/agent-coder
 ## Next Steps
 
 - [Examples](examples.md)
-- [Prompt Engineering](../reference/prompt-tips.md)
+- [SDK: Agent helpers](../sdk/index.md) - `defineAgent`, `AgentTemplateBuilder`,
+  `loadPromptFile`
+- [Hook Events](../reference/hook-events.md) - hooks an agent can react to via
+  its enabled skills

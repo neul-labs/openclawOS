@@ -47,7 +47,7 @@ Create `openclawos.manifest.json`:
       "provides": ["mychannel"]
     },
     "hooks": {
-      "intercepts": ["message_sending"]
+      "subscribes": ["message_sending"]
     },
     "resources": {
       "env": ["MY_API_TOKEN"],
@@ -78,7 +78,7 @@ class MyChannelApp extends ChannelApp {
     protocol: { version: "1.0" },
     capabilities: {
       channels: { provides: ["mychannel"] },
-      hooks: { intercepts: ["message_sending"] },
+      hooks: { subscribes: ["message_sending"] },
     },
   };
 

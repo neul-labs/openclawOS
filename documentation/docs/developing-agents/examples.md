@@ -16,7 +16,7 @@ Example agent templates for different use cases.
       "systemPromptFile": "prompts/support.md",
       "skills": ["memory"],
       "model": {
-        "default": "claude-3-sonnet"
+        "default": "claude-sonnet-4-6"
       },
       "behavior": {
         "compaction": "balanced",
@@ -76,7 +76,7 @@ If you cannot resolve an issue, say:
       "systemPromptFile": "prompts/reviewer.md",
       "skills": ["coding"],
       "model": {
-        "default": "claude-3-opus"
+        "default": "claude-opus-4-6"
       },
       "behavior": {
         "compaction": "minimal",
@@ -142,7 +142,7 @@ Highlight good practices and clean code.
       "systemPromptFile": "prompts/researcher.md",
       "skills": ["memory", "@myorg/web-search"],
       "model": {
-        "default": "claude-3-opus"
+        "default": "claude-opus-4-6"
       },
       "behavior": {
         "compaction": "balanced",
@@ -215,7 +215,7 @@ What couldn't be determined.
       "systemPromptFile": "prompts/writer.md",
       "skills": [],
       "model": {
-        "default": "claude-3-sonnet"
+        "default": "claude-sonnet-4-6"
       },
       "behavior": {
         "compaction": "balanced",
@@ -282,7 +282,7 @@ Adjust your style based on:
       "systemPromptFile": "prompts/multilingual.md",
       "skills": ["memory"],
       "model": {
-        "default": "claude-3-opus"
+        "default": "claude-opus-4-6"
       }
     }
   }

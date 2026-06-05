@@ -157,17 +157,21 @@ The SDK reads these environment variables:
 SDK methods throw typed errors:
 
 ```typescript
-import { IPCError } from "@openclawos/sdk/client";
+import { KernelError } from "@openclawos/sdk";
 
 try {
   await kernel.call("session.get", { key: "invalid" });
 } catch (error) {
-  if (error instanceof IPCError) {
+  if (error instanceof KernelError) {
     console.log(error.code); // "NOT_FOUND"
     console.log(error.message); // "Session not found"
   }
 }
 ```
+
+`IPCErrorCode` (a string union from `@openclawos/protocol`) enumerates the
+codes you might see: `"INVALID_REQUEST"`, `"NOT_FOUND"`, `"INTERNAL_ERROR"`,
+`"TIMEOUT"`, `"DENIED"`, `"UNAUTHORIZED"`, `"NOT_IMPLEMENTED"`, and so on.
 
 ## Logging
 
