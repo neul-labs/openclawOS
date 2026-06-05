@@ -1,6 +1,6 @@
 site_name: OpenClawOS Documentation
 site_description: OS-like architecture for AI assistants
-site_url: https://openclawos.docs.neullabs.com/
+site_url: https://docs.neullabs.com/openclawos/
 repo_url: https://github.com/neul-labs/openclawOS
 repo_name: neul-labs/openclawOS
 edit_uri: edit/main/documentation/docs/
