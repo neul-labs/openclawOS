@@ -2,27 +2,9 @@
   "name": "@openclawos/protocol",
   "version": "0.1.0",
   "description": "OpenClawOS IPC protocol types and schemas",
-  "keywords": [
-    "openclaw",
-    "openclawos",
-    "ai-agent",
-    "protocol",
-    "ipc"
-  ],
   "license": "MIT",
-  "author": "Neul Labs <contact@neullabs.com>",
-  "homepage": "https://openclawos.neullabs.com",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/neul-labs/openclawOS.git",
-    "directory": "packages/protocol"
-  },
-  "bugs": {
-    "url": "https://github.com/neul-labs/openclawOS/issues"
-  },
   "files": [
-    "dist",
-    "README.md"
+    "dist"
   ],
   "type": "module",
   "main": "dist/index.mjs",
