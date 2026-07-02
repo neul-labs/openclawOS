@@ -1,1 +1,1 @@
-export * from "openclawos";
+export * from "openclaw";
