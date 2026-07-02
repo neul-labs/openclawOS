@@ -1,20 +1,15 @@
 # OpenClawOS
 
-<p align="center">
-    <picture>
-        <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/openclaw/openclaw/main/docs/assets/openclaw-logo-text-dark.png">
-        <img src="https://raw.githubusercontent.com/openclaw/openclaw/main/docs/assets/openclaw-logo-text.png" alt="OpenClaw" width="500">
-    </picture>
-</p>
+**OS-like architecture for self-hosted AI assistants** — a kernel-based design with process-isolated applications for reliable, multi-channel AI assistant infrastructure.
 
 <p align="center">
-  <a href="https://github.com/openclaw/openclaw/actions/workflows/ci.yml?branch=main"><img src="https://img.shields.io/github/actions/workflow/status/openclaw/openclaw/ci.yml?branch=main&style=for-the-badge" alt="CI status"></a>
-  <a href="https://github.com/openclaw/openclaw/releases"><img src="https://img.shields.io/github/v/release/openclaw/openclaw?include_prereleases&style=for-the-badge" alt="GitHub release"></a>
-  <a href="https://discord.gg/clawd"><img src="https://img.shields.io/discord/1456350064065904867?label=Discord&logo=discord&logoColor=white&color=5865F2&style=for-the-badge" alt="Discord"></a>
+  <a href="https://github.com/neul-labs/openclawOS/stargazers"><img src="https://img.shields.io/github/stars/neul-labs/openclawOS?style=for-the-badge" alt="GitHub stars"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge" alt="MIT License"></a>
 </p>
 
-**OpenClawOS** is an OS-like architecture for AI assistants. It provides a kernel-based design with process-isolated applications, enabling reliable multi-channel AI assistant infrastructure.
+**[Website](https://openclawos.neullabs.com)** · **[Documentation](https://docs.neullabs.com/openclawos)** · **[GitHub](https://github.com/neul-labs/openclawOS)** · **[Neul Labs](https://www.neullabs.com)**
+
+OpenClawOS is a community fork of [OpenClaw](https://github.com/openclaw/openclaw) maintained by [Neul Labs](https://www.neullabs.com). It provides a kernel-based design with process-isolated applications, enabling reliable multi-channel AI assistant infrastructure.
 
 ## Architecture
 
@@ -56,7 +51,7 @@
 
 ```bash
 # Install
-npm install -g openclaw@latest
+npm install -g openclawos@latest
 
 # Run onboarding wizard
 openclaw onboard --install-daemon
@@ -109,8 +104,8 @@ OpenClawOS supports multiple LLM providers:
 ### From Source
 
 ```bash
-git clone https://github.com/openclaw/openclaw.git
-cd openclaw
+git clone https://github.com/neul-labs/openclawOS.git
+cd openclawOS
 
 pnpm install
 pnpm build
@@ -187,11 +182,27 @@ openclaw/
 
 ## Links
 
-- [Website](https://openclaw.ai)
-- [Documentation](https://docs.openclaw.ai)
-- [Discord Community](https://discord.gg/clawd)
-- [GitHub Issues](https://github.com/openclaw/openclaw/issues)
+- [Website](https://openclawos.neullabs.com)
+- [Documentation](https://docs.neullabs.com/openclawos)
+- [GitHub](https://github.com/neul-labs/openclawOS)
+- [GitHub Issues](https://github.com/neul-labs/openclawOS/issues)
+- [Neul Labs](https://www.neullabs.com)
+- [Upstream OpenClaw](https://github.com/openclaw/openclaw)
 
 ## License
 
 MIT License - see [LICENSE](LICENSE) for details.
+
+---
+
+## Part of the Neul Labs toolchain
+
+OpenClawOS is part of the OpenClaw cluster at [Neul Labs](https://www.neullabs.com):
+
+| Project | Description |
+|---------|-------------|
+| [openclaw-rs](https://github.com/neul-labs/openclaw-rs) | A community Rust implementation of OpenClaw. |
+| [openclawMU](https://github.com/neul-labs/openclawMU) | Multi-tenant fork of OpenClaw with strict data isolation. |
+| [ukkin](https://github.com/neul-labs/ukkin) | Create AI agents on your phone that automate your daily tasks. |
+
+Explore all projects at [neullabs.com](https://www.neullabs.com).

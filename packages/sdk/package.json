@@ -2,9 +2,27 @@
   "name": "@openclawos/sdk",
   "version": "0.1.0",
   "description": "OpenClawOS SDK for building apps, skills, agents, and extensions",
+  "keywords": [
+    "openclaw",
+    "openclawos",
+    "ai-agent",
+    "sdk",
+    "self-hosted"
+  ],
   "license": "MIT",
+  "author": "Neul Labs <contact@neullabs.com>",
+  "homepage": "https://openclawos.neullabs.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/neul-labs/openclawOS.git",
+    "directory": "packages/sdk"
+  },
+  "bugs": {
+    "url": "https://github.com/neul-labs/openclawOS/issues"
+  },
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "type": "module",
   "main": "dist/index.mjs",

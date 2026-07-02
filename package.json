@@ -1,13 +1,30 @@
 {
-  "name": "openclaw",
+  "name": "openclawos",
   "version": "2026.2.15",
-  "description": "OpenClawOS - Multi-channel AI gateway with OS-like extensible architecture",
-  "keywords": [],
+  "description": "OS-like architecture for self-hosted AI assistants — a kernel-based, multi-channel AI agent gateway forked from OpenClaw.",
+  "keywords": [
+    "openclaw",
+    "ai-agent",
+    "ai-gateway",
+    "self-hosted",
+    "kernel",
+    "multi-tenant",
+    "messaging",
+    "chatbot"
+  ],
   "license": "MIT",
-  "author": "",
+  "author": "Neul Labs <contact@neullabs.com>",
+  "homepage": "https://openclawos.neullabs.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/neul-labs/openclawOS.git"
+  },
+  "bugs": {
+    "url": "https://github.com/neul-labs/openclawOS/issues"
+  },
   "bin": {
-    "openclaw": "openclaw.mjs",
-    "openclawos": "openclaw.mjs"
+    "openclawos": "openclaw.mjs",
+    "openclaw": "openclaw.mjs"
   },
   "files": [
     "CHANGELOG.md",

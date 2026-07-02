@@ -2,9 +2,27 @@
   "name": "@openclawos/kernel",
   "version": "0.1.0",
   "description": "OpenClawOS kernel - IPC server, process supervisor, and app registry",
+  "keywords": [
+    "openclaw",
+    "openclawos",
+    "ai-agent",
+    "kernel",
+    "self-hosted"
+  ],
   "license": "MIT",
+  "author": "Neul Labs <contact@neullabs.com>",
+  "homepage": "https://openclawos.neullabs.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/neul-labs/openclawOS.git",
+    "directory": "packages/kernel"
+  },
+  "bugs": {
+    "url": "https://github.com/neul-labs/openclawOS/issues"
+  },
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "type": "module",
   "main": "dist/index.mjs",
