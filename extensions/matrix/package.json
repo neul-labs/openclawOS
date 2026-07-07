@@ -13,7 +13,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "openclaw": "workspace:*"
+    "openclawos": "workspace:*"
   },
   "deprecated": "Use @openclawos/matrix app instead",
   "openclaw": {

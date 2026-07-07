@@ -6,7 +6,7 @@
   "description": "OpenClaw JSON-only LLM task plugin (DEPRECATED: Use @openclawos/app-llm-task instead)",
   "type": "module",
   "devDependencies": {
-    "openclaw": "workspace:*"
+    "openclawos": "workspace:*"
   },
   "deprecated": "This extension is deprecated. Please use @openclawos/app-llm-task app instead.",
   "openclaw": {

@@ -8,7 +8,7 @@
     "@sinclair/typebox": "0.34.48"
   },
   "devDependencies": {
-    "openclaw": "workspace:*"
+    "openclawos": "workspace:*"
   },
   "deprecated": "This extension is deprecated. Please use @openclawos/app-zalouser instead.",
   "openclaw": {

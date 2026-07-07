@@ -5,7 +5,7 @@
   "description": "Lobster workflow tool plugin (typed pipelines + resumable approvals)",
   "type": "module",
   "devDependencies": {
-    "openclaw": "workspace:*"
+    "openclawos": "workspace:*"
   },
   "deprecated": "This extension has been replaced by @openclawos/app-lobster. Please use the new app instead.",
   "openclaw": {

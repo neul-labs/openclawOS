@@ -6,7 +6,7 @@
   "description": "OpenClaw Copilot Proxy provider plugin (DEPRECATED - use @openclawos/app-copilot-proxy)",
   "type": "module",
   "devDependencies": {
-    "openclaw": "workspace:*"
+    "openclawos": "workspace:*"
   },
   "deprecated": "This extension is deprecated. Use @openclawos/app-copilot-proxy instead.",
   "openclaw": {

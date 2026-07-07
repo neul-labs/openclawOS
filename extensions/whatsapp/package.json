@@ -6,7 +6,7 @@
   "description": "DEPRECATED: Use @openclawos/whatsapp app with runtime: ipc. Kept for backward compatibility.",
   "type": "module",
   "devDependencies": {
-    "openclaw": "workspace:*"
+    "openclawos": "workspace:*"
   },
   "deprecated": "Use @openclawos/whatsapp app instead",
   "openclaw": {

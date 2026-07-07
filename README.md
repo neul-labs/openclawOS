@@ -56,7 +56,7 @@
 
 ```bash
 # Install
-npm install -g openclaw@latest
+npm install -g openclawos@latest
 
 # Run onboarding wizard
 openclaw onboard --install-daemon

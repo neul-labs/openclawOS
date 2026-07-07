@@ -12,6 +12,6 @@
     "./cli-entry": "./bin/clawdbot.js"
   },
   "dependencies": {
-    "openclaw": "workspace:*"
+    "openclawos": "workspace:*"
   }
 }

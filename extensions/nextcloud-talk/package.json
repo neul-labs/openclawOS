@@ -5,7 +5,7 @@
   "description": "OpenClaw Nextcloud Talk channel plugin (DEPRECATED - use @openclawos/app-nextcloud-talk instead)",
   "type": "module",
   "devDependencies": {
-    "openclaw": "workspace:*"
+    "openclawos": "workspace:*"
   },
   "deprecated": "This extension-based channel plugin is deprecated. Please use the new app-based @openclawos/app-nextcloud-talk instead.",
   "openclaw": {

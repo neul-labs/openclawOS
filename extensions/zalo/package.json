@@ -8,7 +8,7 @@
     "undici": "7.22.0"
   },
   "devDependencies": {
-    "openclaw": "workspace:*"
+    "openclawos": "workspace:*"
   },
   "deprecated": "This package is deprecated. Use @openclawos/app-zalo instead.",
   "openclaw": {

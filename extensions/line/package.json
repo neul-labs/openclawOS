@@ -6,7 +6,7 @@
   "description": "OpenClaw LINE channel plugin (DEPRECATED: Use @openclawos/app-line instead)",
   "type": "module",
   "devDependencies": {
-    "openclaw": "workspace:*"
+    "openclawos": "workspace:*"
   },
   "deprecated": "This extension is deprecated. Please use @openclawos/app-line instead.",
   "openclaw": {

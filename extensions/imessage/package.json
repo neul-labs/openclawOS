@@ -6,7 +6,7 @@
   "description": "OpenClaw iMessage channel plugin (DEPRECATED - use @openclawos/app-imessage)",
   "type": "module",
   "devDependencies": {
-    "openclaw": "workspace:*"
+    "openclawos": "workspace:*"
   },
   "deprecated": "This extension has been migrated to @openclawos/app-imessage in /apps/imessage/",
   "openclaw": {

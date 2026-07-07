@@ -6,7 +6,7 @@
   "description": "OpenClaw Mattermost channel plugin (DEPRECATED)",
   "type": "module",
   "devDependencies": {
-    "openclaw": "workspace:*"
+    "openclawos": "workspace:*"
   },
   "deprecated": "This package has been superseded by @openclawos/app-mattermost. Please use the new app-based implementation in /apps/mattermost/",
   "openclaw": {

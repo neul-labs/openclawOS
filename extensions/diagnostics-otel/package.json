@@ -18,7 +18,7 @@
     "@opentelemetry/semantic-conventions": "^1.39.0"
   },
   "devDependencies": {
-    "openclaw": "workspace:*"
+    "openclawos": "workspace:*"
   },
   "deprecated": "This package is deprecated. Please use @openclawos/app-diagnostics instead.",
   "openclaw": {

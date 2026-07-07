@@ -9,7 +9,7 @@
     "@urbit/aura": "^3.0.0"
   },
   "devDependencies": {
-    "openclaw": "workspace:*"
+    "openclawos": "workspace:*"
   },
   "deprecated": "This extension has been superseded by @openclawos/app-tlon in apps/tlon/",
   "openclaw": {

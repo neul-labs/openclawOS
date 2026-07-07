@@ -10,7 +10,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "openclaw": "workspace:*"
+    "openclawos": "workspace:*"
   },
   "deprecated": "This extension is deprecated. Please use @openclawos/app-voice-call app instead.",
   "openclaw": {

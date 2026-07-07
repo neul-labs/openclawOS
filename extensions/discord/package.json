@@ -6,7 +6,7 @@
   "description": "DEPRECATED: Use @openclawos/discord app with runtime: ipc. Kept for backward compatibility.",
   "type": "module",
   "devDependencies": {
-    "openclaw": "workspace:*"
+    "openclawos": "workspace:*"
   },
   "deprecated": "Use @openclawos/discord app instead",
   "openclaw": {

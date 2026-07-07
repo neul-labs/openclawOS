@@ -6,7 +6,7 @@
   "description": "DEPRECATED: OpenProse VM skill pack plugin (slash command + telemetry). Replaced by @openclawos/app-open-prose.",
   "type": "module",
   "devDependencies": {
-    "openclaw": "workspace:*"
+    "openclawos": "workspace:*"
   },
   "deprecated": "This extension is deprecated. Use @openclawos/app-open-prose instead.",
   "openclaw": {

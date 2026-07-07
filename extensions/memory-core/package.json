@@ -6,10 +6,10 @@
   "description": "OpenClaw core memory search plugin",
   "type": "module",
   "devDependencies": {
-    "openclaw": "workspace:*"
+    "openclawos": "workspace:*"
   },
   "peerDependencies": {
-    "openclaw": ">=2026.1.26"
+    "openclawos": ">=2026.1.26"
   },
   "openclaw": {
     "extensions": [
