@@ -31,7 +31,7 @@ Notes:
 
   The installer will `git pull --rebase` **only** if the repo is clean.
 
-- For **global installs**, the script uses `npm install -g openclaw@latest` under the hood.
+- For **global installs**, the script uses `npm install -g openclawos@latest` under the hood.
 - Legacy note: `clawdbot` remains available as a compatibility shim.
 
 ## Before you update
@@ -48,11 +48,11 @@ Notes:
 Global install (pick one):
 
 ```bash
-npm i -g openclaw@latest
+npm i -g openclawos@latest
 ```
 
 ```bash
-pnpm add -g openclaw@latest
+pnpm add -g openclawos@latest
 ```
 
 We do **not** recommend Bun for the Gateway runtime (WhatsApp/Telegram bugs).
